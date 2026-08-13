@@ -79,14 +79,30 @@ export class UsuariosService {
   async iniciarSesion(bodyLogin: any): Promise<CoreResponse> {
     try {
       const bodyMapeado = {
-        email: bodyLogin.correo || bodyLogin.email,
-        password: bodyLogin.contraseña || bodyLogin.password,
+        email: bodyLogin?.correo ?? bodyLogin?.email,
+        password: bodyLogin?.contraseña ?? bodyLogin?.password,
       };
 
-      // Se inyecta la cabecera Origin requerida por Better Auth
-      return await this.coreClient.iniciarSesion(bodyMapeado, this.defaultHeaders);
+      if (!bodyMapeado.email || !bodyMapeado.password) {
+        throw new HttpException('Faltan credenciales', HttpStatus.BAD_REQUEST);
+      }
+
+      const resultado = await this.coreClient.iniciarSesion(bodyMapeado, this.defaultHeaders);
+
+      if (resultado.status >= 400) {
+        return resultado;
+      }
+
+      return {
+        status: resultado.status,
+        data: resultado.data,
+        cookies: resultado.cookies,
+      };
     } catch (error) {
       console.error('Error conectando al Core en login:', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException('El servidor principal no responde', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

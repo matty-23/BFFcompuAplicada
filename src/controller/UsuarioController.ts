@@ -35,6 +35,6 @@ export class UsuariosController {
     }
 
     res.status(resultado.status);
-    return resultado.data;
+    return resultado.data ?? { ok: true };
   }
 }

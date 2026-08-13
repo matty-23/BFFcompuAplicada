@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IEventoService } from '../interfaces/IEventoService';
-import { IEventoClient } from '../interfaces/IEventoClient';
+import type { IEventoService } from '../interfaces/IEventoService';
+import type { IEventoClient } from '../interfaces/IEventoClient';
 import { EventoViewModel } from '../viewModels/EventoViewModel';
 import { CrearEventoDTO, ActualizarEventoDTO } from '../DTO/EventoDTO';
 

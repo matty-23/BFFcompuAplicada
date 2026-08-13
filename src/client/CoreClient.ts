@@ -11,6 +11,20 @@ export class CoreClient {
   private readonly coreUrl = process.env.CORE_BACKEND_URL || 'http://127.0.0.1:3000/api/auth';
   private readonly coreApiUrl = 'http://127.0.0.1:3000/api';
 
+  private extraerCookies(response: Response): string[] {
+    const cookies = response.headers.getSetCookie?.() ?? [];
+    if (cookies.length > 0) {
+      return cookies;
+    }
+
+    const cookieHeader = response.headers.get('set-cookie');
+    if (!cookieHeader) {
+      return [];
+    }
+
+    return Array.isArray(cookieHeader) ? cookieHeader : [cookieHeader];
+  }
+
   async registrarUsuario(body: any, headers: Record<string, any>): Promise<CoreResponse> {
     const url = `${this.coreUrl}/sign-up/email`;
     const response = await fetch(url, {
@@ -22,13 +36,12 @@ export class CoreClient {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
-    const cookies = response.headers.getSetCookie();
+    const data = await response.json().catch(() => null);
 
     return {
       status: response.status,
       data,
-      cookies,
+      cookies: this.extraerCookies(response),
     };
   }
 
@@ -43,13 +56,12 @@ export class CoreClient {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
-    const cookies = response.headers.getSetCookie();
+    const data = await response.json().catch(() => null);
 
     return {
       status: response.status,
       data,
-      cookies,
+      cookies: this.extraerCookies(response),
     };
   }
 
@@ -65,13 +77,12 @@ export class CoreClient {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
-    
-    // Incluimos la propiedad de cookies aunque esté vacía para cumplir el contrato
+    const data = await response.json().catch(() => null);
+
     return {
       status: response.status,
       data,
-      cookies: response.headers.getSetCookie(),
+      cookies: this.extraerCookies(response),
     };
   }
 }
