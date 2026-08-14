@@ -1,7 +1,7 @@
 import { Controller, Query, Get, Post, Put, Delete, Patch, Param, Body, Inject, NotFoundException, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
 import type { IEventoService } from '../interfaces/IEventoService';
 import { CrearEventoDTO, ActualizarEventoDTO, AsignarEncargadoDTO, ParticipantesDTO } from '../DTO/EventoDTO';
-import { FiltrosEventoDto } from 'src/DTO/FiltrosDto';
+import { FiltrosEventoDto } from '../DTO/FiltrosDto';
 @Controller('api/eventos')
 export class EventoController {
 

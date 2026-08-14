@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { EventoModule } from './modules/EventoModule';
+import { UsuariosModule } from './modules/usuario.module'; // Ajustá la ruta según tus carpetas
 
 @Module({
-    imports: [EventoModule],
+  imports: [UsuariosModule],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

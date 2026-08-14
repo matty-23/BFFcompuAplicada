@@ -1,20 +1,18 @@
-import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule);
 
-    // Habilitar CORS para que Next.js pueda consumir el BFF
-    app.enableCors();
+  // Habilitar CORS para recibir peticiones y permitir envío/recepción de cookies
+  app.enableCors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  });
 
-    // Validación automática de DTOs con class-validator
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
-
-    const PORT = process.env.PORT ?? 3001;
-    await app.listen(PORT);
-    console.log(`🚀 BFF corriendo en http://localhost:${PORT}`);
+  const port = process.env.PORT || 3001;
+  await app.listen(port);
+  console.log(`🚀 BFF escuchando en http://localhost:${port}`);
 }
 
 bootstrap();
