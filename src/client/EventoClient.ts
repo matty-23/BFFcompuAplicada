@@ -53,9 +53,9 @@ export class EventoClient implements IEventoClient {
     }
 
     // Métodos
-    async getAll(): Promise<EventoViewModel[]> {
+    async getAll(page: number = 1): Promise<EventoViewModel[]> {
         try {
-            const res = await fetch(this.baseUrl);
+            const res = await fetch(`${this.baseUrl}/${page}/all`);
             if (!res.ok) throw { status: res.status, message: await res.text() };
             const data: any[] = await res.json();
             return data.map(e => this.mapearEvento(e));
@@ -95,13 +95,24 @@ export class EventoClient implements IEventoClient {
         } catch (e) { this.handleError(e, 'actualizar'); }
     }
 
-    async eliminar(id: string): Promise<void> {
+    async eliminar(id: string[]): Promise<void> {
         try {
             const res = await fetch(`${this.baseUrl}/${id}`, { method: 'DELETE' });
             if (!res.ok) throw { status: res.status, message: await res.text() };
         } catch (e) { this.handleError(e, 'eliminar'); }
     }
+    // En EventoClient (BFF)
+    async getConFiltros(filtros: any): Promise<EventoViewModel[]> {
+        try {
+            // Construimos los query params dinámicamente
+            const queryParams = new URLSearchParams(filtros).toString();
+            const res = await fetch(`${this.baseUrl}/filtros?${queryParams}`);
+            if (!res.ok) throw { status: res.status, message: await res.text() };
 
+            const data: any[] = await res.json();
+            return data.map(e => this.mapearEvento(e));
+        } catch (e) { this.handleError(e, 'getConFiltros'); }
+    }
     async asignarEncargado(id: string, usuarioId: string): Promise<EventoViewModel> {
         try {
             const res = await fetch(`${this.baseUrl}/${id}/encargado`, {
