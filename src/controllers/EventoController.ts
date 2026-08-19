@@ -16,6 +16,13 @@ export class EventoController {
         return eventos.map(e => e.toJSON());
     }
 
+    // GET /api/eventos/usuario/:usuarioId — debe ir ANTES de /:id para no ser capturado como parámetro
+    @Get('usuario/:usuarioId')
+    async getEventosPorUsuario(@Param('usuarioId') usuarioId: string) {
+        const eventos = await this.eventoService.getEventosPorUsuario(usuarioId);
+        return eventos.map(e => e.toJSON());
+    }
+
     // GET /api/eventos/:id
     @Get(':id')
     async getById(@Param('id') id: string) {

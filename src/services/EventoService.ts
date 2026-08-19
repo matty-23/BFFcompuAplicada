@@ -59,4 +59,9 @@ export class EventoService implements IEventoService {
     async borrarParticipante(id: string, usuarioId: string): Promise<EventoViewModel> {
         return await this.eventoClient.borrarParticipante(id, usuarioId);
     }
+
+    // Mejora 3: delega al client la obtención de eventos por usuario
+    async getEventosPorUsuario(usuarioId: string): Promise<EventoViewModel[]> {
+        return await this.eventoClient.getEventosPorUsuario(usuarioId);
+    }
 }

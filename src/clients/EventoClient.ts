@@ -136,4 +136,14 @@ export class EventoClient implements IEventoClient {
             return this.mapearEvento(await res.json());
         } catch (e) { this.handleError(e, 'borrarParticipante'); }
     }
+
+    // Mejora 3: obtener todos los eventos en los que participa un usuario
+    async getEventosPorUsuario(usuarioId: string): Promise<EventoViewModel[]> {
+        try {
+            const res = await fetch(`${this.baseUrl}/usuario/${usuarioId}`);
+            if (!res.ok) throw { status: res.status, message: await res.text() };
+            const data: any[] = await res.json();
+            return data.map(e => this.mapearEvento(e));
+        } catch (e) { this.handleError(e, 'getEventosPorUsuario'); }
+    }
 }

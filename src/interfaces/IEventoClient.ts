@@ -9,4 +9,5 @@ export interface IEventoClient {
     asignarEncargado(id: string, usuarioId: string): Promise<EventoViewModel>;
     agregarParticipantes(id: string, participantes: string[]): Promise<void>;
     borrarParticipante(id: string, usuarioId: string): Promise<EventoViewModel>;
+    getEventosPorUsuario(usuarioId: string): Promise<EventoViewModel[]>;
 }
