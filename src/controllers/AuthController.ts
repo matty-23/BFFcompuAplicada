@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Res, Req, UnauthorizedException, Inject, Injectable } from '@nestjs/common';
+import { Controller, Post, Get, Body, Res, Req, UnauthorizedException, Inject, Injectable, Headers } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthService } from '../services/AuthService';
 import { CrearUsuarioDTO,UsuarioDTO } from '../DTO/UsuarioDTO';
@@ -10,8 +10,8 @@ export class AuthController {
   constructor(@Inject() private readonly usuariosService: AuthService) {}
 
   @Post('registro')
-  async registrarUsuario(@Body() crearUsuarioDto: CrearUsuarioDTO,@Res({ passthrough: true }) res: Response,) {
-    const resultado = await this.usuariosService.registrarUsuario(crearUsuarioDto);
+  async registrarUsuario(@Body() crearUsuarioDto: CrearUsuarioDTO,@Headers() headers: Record<string, string>,@Res({ passthrough: true }) res: Response) {
+    const resultado = await this.usuariosService.registrarUsuario(crearUsuarioDto,headers);
 
     if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
     
@@ -35,8 +35,8 @@ export class AuthController {
   }
 
   @Post('login')
-  async iniciarSesion(@Body() bodyLogin: LoginUsuarioDTO,@Res({ passthrough: true }) res: Response,) {
-    const resultado = await this.usuariosService.iniciarSesion(bodyLogin);
+  async iniciarSesion(@Body() bodyLogin: LoginUsuarioDTO,@Headers() headers: Record<string, string>,@Res({ passthrough: true }) res: Response,) {
+    const resultado = await this.usuariosService.iniciarSesion(bodyLogin,headers);
 
     if (resultado.cookies && resultado.cookies.length > 0) {
       res.setHeader('Set-Cookie', resultado.cookies);

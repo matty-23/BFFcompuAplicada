@@ -7,15 +7,10 @@ import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
 
 @Injectable()
 export class AuthService {
-  // Definimos las cabeceras base que exige Better Auth
-  private readonly defaultHeaders = {
-    'Content-Type': 'application/json',
-    'Origin': process.env.FRONTEND_URL || 'http://localhost:5173',
-  };
 
   constructor(private readonly coreClient: AuthClient) {}
 
-  async registrarUsuario(dto: CrearUsuarioDTO): Promise<CoreResponse> {
+  async registrarUsuario(dto: CrearUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse> {
     try {
       const bodyAuth = {
         email: dto.correo,
@@ -25,7 +20,7 @@ export class AuthService {
         departamento: dto.departamento,
       };
 
-      const resultadoAuth = await this.coreClient.registrarUsuario(bodyAuth, this.defaultHeaders);
+      const resultadoAuth = await this.coreClient.registrarUsuario(bodyAuth, headers);
 
       if (resultadoAuth.status >= 400) {
         return resultadoAuth;
@@ -57,10 +52,10 @@ export class AuthService {
     }
   }
 
-  async iniciarSesion(bodyLogin: LoginUsuarioDTO): Promise<CoreResponse> {
+  async iniciarSesion(bodyLogin: LoginUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse> {
     try {
 
-      const resultado = await this.coreClient.iniciarSesion(bodyLogin, this.defaultHeaders);
+      const resultado = await this.coreClient.iniciarSesion(bodyLogin, headers);
 
       if (resultado.status >= 400) {
         return resultado;

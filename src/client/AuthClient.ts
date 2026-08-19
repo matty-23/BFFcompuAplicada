@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import "dotenv/config";
 import { CoreResponse } from '../interfaces/CoreResponse';
 import { RegistrarUsuarioDTO, LoginUsuarioDTO } from "../DTO/AuthUsuarioDTO"
 
@@ -41,15 +40,25 @@ export class AuthClient {
   }
 
   async iniciarSesion(body: LoginUsuarioDTO, headers: Record<string, any>): Promise<CoreResponse> {
-    const url = `${process.env.coreBaseUrl}/sign-in/email`;
+    const url = `${process.env.coreBaseUrl}/api/auth/sign-in/email`;
+    
+    const newHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (headers.origin) {
+      newHeaders['Origin'] = headers.origin;
+    }
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        ...headers,
+        ...newHeaders,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
     });
+
 
     const data = await response.json().catch(() => null);
 
