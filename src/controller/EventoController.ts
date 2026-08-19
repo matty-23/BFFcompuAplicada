@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Put, Delete, Patch, Param, Body, Inject, NotFoundException, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
-import { IEventoService } from '../interfaces/IEventoService';
+import { Controller, Query, Get, Post, Put, Delete, Patch, Param, Body, Inject, NotFoundException, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
+import type { IEventoService } from '../interfaces/IEventoService';
 import { CrearEventoDTO, ActualizarEventoDTO, AsignarEncargadoDTO, ParticipantesDTO } from '../DTO/EventoDTO';
-
+import { FiltrosEventoDto } from '../DTO/FiltrosDto';
 @Controller('api/eventos')
 export class EventoController {
 
@@ -16,13 +16,16 @@ export class EventoController {
         return eventos.map(e => e.toJSON());
     }
 
-    // GET /api/eventos/usuario/:usuarioId — debe ir ANTES de /:id para no ser capturado como parámetro
-    @Get('usuario/:usuarioId')
-    async getEventosPorUsuario(@Param('usuarioId') usuarioId: string) {
-        const eventos = await this.eventoService.getEventosPorUsuario(usuarioId);
-        return eventos.map(e => e.toJSON());
+    @Get('filtros')
+    async busquedaBlanda(@Query() filtros: FiltrosEventoDto) {
+        const eventos = await this.eventoService.filtrado(filtros);
+        // Retornamos un objeto JSON
+        return {
+            ok: true,
+            cantidad: eventos.length,
+            data: eventos
+        };
     }
-
     // GET /api/eventos/:id
     @Get(':id')
     async getById(@Param('id') id: string) {
@@ -51,7 +54,7 @@ export class EventoController {
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     async eliminar(@Param('id') id: string) {
-        await this.eventoService.eliminarEvento(id);
+        await this.eventoService.eliminarEvento([id]);
     }
 
     // PATCH /api/eventos/:id/encargado
@@ -76,4 +79,5 @@ export class EventoController {
         if (!evento) throw new NotFoundException(`Evento o participante no encontrado.`);
         return evento.toJSON();
     }
+
 }

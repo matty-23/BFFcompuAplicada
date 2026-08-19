@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IEventoService } from '../interfaces/IEventoService';
-import { IEventoClient } from '../interfaces/IEventoClient';
+import type { IEventoService } from '../interfaces/IEventoService';
+import type { IEventoClient } from '../interfaces/IEventoClient';
 import { EventoViewModel } from '../viewModels/EventoViewModel';
 import { CrearEventoDTO, ActualizarEventoDTO } from '../DTO/EventoDTO';
-
+import { FiltrosEventoDto } from 'src/DTO/FiltrosDto';
 
 @Injectable()
 export class EventoService implements IEventoService {
@@ -15,7 +15,14 @@ export class EventoService implements IEventoService {
     async getEventos(): Promise<EventoViewModel[]> {
         return await this.eventoClient.getAll();
     }
+    async filtrado(filtros: FiltrosEventoDto): Promise<EventoViewModel[]> {
+        // Por defecto, si no mandan página, le asignamos la página 1
+        if (!filtros.page) {
+            filtros.page = 1;
+        }
 
+        return await this.eventoClient.getConFiltros(filtros);
+    }
     async getEventoById(id: string): Promise<EventoViewModel | null> {
         return await this.eventoClient.getById(id);
     }
@@ -44,7 +51,7 @@ export class EventoService implements IEventoService {
         await this.eventoClient.actualizar(id, payload);
     }
 
-    async eliminarEvento(id: string): Promise<void> {
+    async eliminarEvento(id: string[]): Promise<void> {
         await this.eventoClient.eliminar(id);
     }
 
@@ -58,10 +65,5 @@ export class EventoService implements IEventoService {
 
     async borrarParticipante(id: string, usuarioId: string): Promise<EventoViewModel> {
         return await this.eventoClient.borrarParticipante(id, usuarioId);
-    }
-
-    // Mejora 3: delega al client la obtención de eventos por usuario
-    async getEventosPorUsuario(usuarioId: string): Promise<EventoViewModel[]> {
-        return await this.eventoClient.getEventosPorUsuario(usuarioId);
     }
 }
