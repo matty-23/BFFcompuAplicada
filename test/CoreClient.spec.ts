@@ -1,4 +1,4 @@
-import { CoreClient } from '../src/client/CoreClient';
+import { CoreClient } from '../src/client/AuthClient';
 
 
 describe('CoreClient login', () => {

@@ -1,15 +1,10 @@
 import { Injectable } from '@nestjs/common';
-
-export interface CoreResponse<T = any> {
-  status: number;
-  data: T;
-  cookies?: string[];
-}
+import "dotenv/config";
+import { CoreResponse } from '../interfaces/CoreResponse';
+import { RegistrarUsuarioDTO, LoginUsuarioDTO } from "../DTO/AuthUsuarioDTO"
 
 @Injectable()
-export class CoreClient {
-  private readonly coreUrl = process.env.CORE_BACKEND_URL || 'http://127.0.0.1:3000/api/auth';
-  private readonly coreApiUrl = 'http://127.0.0.1:3000/api';
+export class AuthClient {
 
   private extraerCookies(response: Response): string[] {
     const cookies = response.headers.getSetCookie?.() ?? [];
@@ -25,8 +20,8 @@ export class CoreClient {
     return Array.isArray(cookieHeader) ? cookieHeader : [cookieHeader];
   }
 
-  async registrarUsuario(body: any, headers: Record<string, any>): Promise<CoreResponse> {
-    const url = `${this.coreUrl}/sign-up/email`;
+  async registrarUsuario(body: RegistrarUsuarioDTO, headers: Record<string, any>): Promise<CoreResponse> {
+    const url = `${process.env.coreBaseUrl}/sign-up/email`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -45,8 +40,8 @@ export class CoreClient {
     };
   }
 
-  async iniciarSesion(body: any, headers: Record<string, any>): Promise<CoreResponse> {
-    const url = `${this.coreUrl}/sign-in/email`;
+  async iniciarSesion(body: LoginUsuarioDTO, headers: Record<string, any>): Promise<CoreResponse> {
+    const url = `${process.env.coreBaseUrl}/sign-in/email`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -64,25 +59,25 @@ export class CoreClient {
       cookies: this.extraerCookies(response),
     };
   }
+  //No es una funcion necesaria
+  // async crearUsuarioAdmin(body: any, headers: Record<string, any>): Promise<CoreResponse> {
+  //   const url = `${process.env.coreBaseUrl}/register`;
 
-  async crearUsuarioNegocio(body: any, headers: Record<string, any>): Promise<CoreResponse> {
-    const url = `${this.coreApiUrl}/register`;
+  //   const response = await fetch(url, {
+  //     method: 'POST',
+  //     headers: {
+  //       ...headers,
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(body),
+  //   });
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+  //   const data = await response.json().catch(() => null);
 
-    const data = await response.json().catch(() => null);
-
-    return {
-      status: response.status,
-      data,
-      cookies: this.extraerCookies(response),
-    };
-  }
+  //   return {
+  //     status: response.status,
+  //     data,
+  //     cookies: this.extraerCookies(response),
+  //   };
+  // }
 }

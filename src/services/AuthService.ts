@@ -1,27 +1,30 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { CoreClient, CoreResponse } from '../client/CoreClient';
+import { AuthClient} from '../client/AuthClient';
+import { CoreResponse } from '../interfaces/CoreResponse';
 import { Usuario } from '../models/Usuario';
-import { CrearUsuarioDto } from '../Dtos/UsuarioDTO';
+import { CrearUsuarioDTO, UsuarioDTO } from '../DTO/UsuarioDTO';
+import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
 
 @Injectable()
-export class UsuariosService {
+export class AuthService {
   // Definimos las cabeceras base que exige Better Auth
   private readonly defaultHeaders = {
     'Content-Type': 'application/json',
     'Origin': process.env.FRONTEND_URL || 'http://localhost:5173',
   };
 
-  constructor(private readonly coreClient: CoreClient) {}
+  constructor(private readonly coreClient: AuthClient) {}
 
-  async registrarUsuario(dto: CrearUsuarioDto): Promise<CoreResponse> {
+  async registrarUsuario(dto: CrearUsuarioDTO): Promise<CoreResponse> {
     try {
       const bodyAuth = {
         email: dto.correo,
         password: dto.contraseña,
-        name: `${dto.nombre} ${dto.apellido}`.trim(),
+        name: dto.nombre,
+        apellido:dto.apellido,
+        departamento: dto.departamento,
       };
 
-      // Se envían las cabeceras que incluyen Origin
       const resultadoAuth = await this.coreClient.registrarUsuario(bodyAuth, this.defaultHeaders);
 
       if (resultadoAuth.status >= 400) {
@@ -29,13 +32,6 @@ export class UsuariosService {
       }
 
       const authUser = resultadoAuth.data.user || resultadoAuth.data;
-      const setCookieHeader = resultadoAuth.cookies;
-
-      const headersConSesion: Record<string, any> = { ...this.defaultHeaders };
-      if (setCookieHeader && setCookieHeader.length > 0) {
-        headersConSesion['cookie'] = setCookieHeader.map((c: string) => c.split(';')[0]).join('; ');
-      }
-
       const nuevoUsuario = new Usuario(
         authUser.id || '',
         dto.nombre,
@@ -43,24 +39,9 @@ export class UsuariosService {
         dto.correo,
         dto.departamento,
         dto.rol,
-        dto.contraseña
+        ""
       );
 
-      const payloadNegocio = {
-        id: nuevoUsuario._id,
-        nombre: nuevoUsuario._nombre,
-        apellido: nuevoUsuario._apellido,
-        correo: nuevoUsuario._correo,
-        contraseña: nuevoUsuario._contraseña,
-        departamento: nuevoUsuario._departamento,
-        rol: nuevoUsuario._rol,
-      };
-
-      const resultadoNegocio = await this.coreClient.crearUsuarioNegocio(payloadNegocio, headersConSesion);
-
-      if (resultadoNegocio.status >= 400) {
-        return resultadoNegocio;
-      }
 
       return {
         status: 201,
@@ -76,18 +57,10 @@ export class UsuariosService {
     }
   }
 
-  async iniciarSesion(bodyLogin: any): Promise<CoreResponse> {
+  async iniciarSesion(bodyLogin: LoginUsuarioDTO): Promise<CoreResponse> {
     try {
-      const bodyMapeado = {
-        email: bodyLogin?.correo ?? bodyLogin?.email,
-        password: bodyLogin?.contraseña ?? bodyLogin?.password,
-      };
 
-      if (!bodyMapeado.email || !bodyMapeado.password) {
-        throw new HttpException('Faltan credenciales', HttpStatus.BAD_REQUEST);
-      }
-
-      const resultado = await this.coreClient.iniciarSesion(bodyMapeado, this.defaultHeaders);
+      const resultado = await this.coreClient.iniciarSesion(bodyLogin, this.defaultHeaders);
 
       if (resultado.status >= 400) {
         return resultado;
