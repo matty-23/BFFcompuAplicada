@@ -1,5 +1,4 @@
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
-import { AuthClient} from '../client/AuthClient';
 import { CoreResponse } from '../interfaces/CoreResponse';
 import { Usuario } from '../models/Usuario';
 import { CrearUsuarioDTO, UsuarioDTO } from '../DTO/UsuarioDTO';
