@@ -20,18 +20,18 @@ export class AuthClient {
   }
 
   async registrarUsuario(body: RegistrarUsuarioDTO, headers: Record<string, any>): Promise<CoreResponse> {
-    const url = `${process.env.coreBaseUrl}/sign-up/email`;
+    const url = `${process.env.coreBaseUrl}/api/auth/sign-up/email`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        ...headers,
         'Content-Type': 'application/json',
+        ...(headers.origin && { 'Origin': headers.origin }),
+        ...(headers.cookie && { 'Cookie': headers.cookie }),
       },
       body: JSON.stringify(body),
     });
-
     const data = await response.json().catch(() => null);
-
+    console.log('COOKIES CORE:', data.cookies);
     return {
       status: response.status,
       data,
@@ -41,7 +41,7 @@ export class AuthClient {
 
   async iniciarSesion(body: LoginUsuarioDTO, headers: Record<string, any>): Promise<CoreResponse> {
     const url = `${process.env.coreBaseUrl}/api/auth/sign-in/email`;
-    
+
     const newHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
     };
