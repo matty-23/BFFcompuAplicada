@@ -7,6 +7,6 @@ export interface IUsuarioService{
     actualizarContraseña(body:CambiarContraseñaDTO,headers: Record<string, any>): Promise<CoreResponse>;
     obtenerUsuarios(headers: Record<string, any>):Promise<CoreResponse>;
     obtenerUsuario(headers: Record<string, any>, id:string):Promise<CoreResponse>;
-    listarUsuarios(headers: Record<string, any>,filtros?:Record<string, string>):Promise<CoreResponse>;
+    listarUsuarios(headers: Record<string, any>,filtros:Record<string, string>):Promise<CoreResponse>;
     eliminarUsuario(headers: Record<string, any>,id:string);
 }

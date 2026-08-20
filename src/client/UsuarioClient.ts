@@ -62,7 +62,7 @@ export class UsuarioClient implements IUsuarioClient {
     async actualizarContraseña(body: CambiarContraseñaDTO, headers: Record<string, any>): Promise<CoreResponse> {
         const url = `${process.env.coreBaseUrl}api/auth/change-password`;
         const response = await fetch(url, {
-            method: 'POST   ',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 ...(headers.origin && { Origin: headers.origin }),
