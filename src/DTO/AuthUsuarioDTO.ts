@@ -1,5 +1,4 @@
-import { IsNumber, IsString, IsNotEmpty, IsOptional, Max, IsInt, Min, IsIn } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsNumber, IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class RegistrarUsuarioDTO{
     @IsString()
@@ -35,4 +34,23 @@ export class LoginUsuarioDTO{
     @IsString()
     @IsNotEmpty()
     readonly password!: string;
+}
+
+export class CambiarContraseñaDTO{
+
+    @IsString()
+    @IsNotEmpty()
+    readonly id!:string;
+
+    @IsString()
+    @IsNotEmpty()
+    readonly currentPassword!:string;
+    
+    @IsString()
+    @IsNotEmpty()
+    readonly newPassword!:string;
+
+    @IsString()
+    @IsOptional()
+    readonly revokeOtherSessions?: boolean;
 }

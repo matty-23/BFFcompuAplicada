@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from '../controllers/AuthController';
-import { AuthService } from '../services/AuthService';
-import { AuthClient } from '../client/AuthClient';
+import { UsuarioController } from '../controllers/UsuarioController';
+import { UsuarioService } from '../services/UsuarioService';
+import { UsuarioClient } from '../client/UsuarioClient';
 
 @Module({
-  controllers: [AuthController],
+  controllers: [UsuarioController],
   providers: [{
-      provide: 'IAuthService', 
-      useClass: AuthService,   
+      provide: 'IUsuarioService', 
+      useClass: UsuarioService,   
     },{
-      provide: 'IAuthClient', 
-      useClass: AuthClient,   
+      provide: 'IUsuarioClient', 
+      useClass: UsuarioClient,   
     }],
 })
 export class UsuariosModule {}
