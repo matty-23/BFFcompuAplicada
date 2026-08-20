@@ -1,15 +1,16 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { AuthClient} from '../client/AuthClient';
 import { CoreResponse } from '../interfaces/CoreResponse';
 import { Usuario } from '../models/Usuario';
 import { CrearUsuarioDTO, UsuarioDTO } from '../DTO/UsuarioDTO';
 import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
+import {type  IAuthClient } from '../interfaces/IAuthClient';
 import { IAuthService } from '../interfaces/IAuthService';
 
 @Injectable()
 export class AuthService implements IAuthService {
 
-  constructor(private readonly coreClient: AuthClient) {}
+  constructor(@Inject('IAuthClient')private readonly coreClient: IAuthClient) {}
 
   async registrarUsuario(dto: CrearUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse> {
     try {
