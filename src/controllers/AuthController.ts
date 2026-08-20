@@ -3,7 +3,6 @@ import type { Response, Request } from 'express';
 import type{ IAuthService } from '../interfaces/IAuthService';
 import { CrearUsuarioDTO, UsuarioDTO } from '../DTO/UsuarioDTO';
 import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
-import type { FastifyReply } from 'fastify';
 
 @Controller('/auth')
 
