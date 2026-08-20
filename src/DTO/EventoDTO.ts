@@ -1,47 +1,44 @@
-import { IsString, IsNotEmpty, IsOptional, IsInt, IsDateString, Min } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsArray, ValidateNested, IsInt, IsOptional, ArrayMinSize, IsDateString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class CrearEventoDTO {
+export class OcurrenciaDTO {
     @IsString()
     @IsNotEmpty()
-    readonly nombre!: string;
-
-    @IsDateString()
-    @IsNotEmpty()
-    readonly fechaInicio!: string;
-
-    @IsDateString()
-    @IsNotEmpty()
-    readonly fechaFinalizacion!: string;
+    lugar!: string;
 
     @IsString()
     @IsNotEmpty()
-    readonly lugar!: string;
+    fechaInicio!: string;
+
+    @IsString()
+    @IsNotEmpty()
+    fechaFinalizacion!: string;
+
+    @IsNumber()
+    cantidadPersonas!: number;
+}
+
+
+export class CrearEventoMultiDTO {
+    @IsString()
+    @IsNotEmpty()
+    readonly titulo!: string;
 
     @IsString()
     @IsOptional()
     readonly categoria?: string;
 
-    @IsInt()
-    @Min(1)
-    readonly cantidadPersonas!: number;
+    @IsArray()
+    @ArrayMinSize(2)
+    @ValidateNested({ each: true })
+    @Type(() => OcurrenciaDTO)
+    readonly ocurrencias!: OcurrenciaDTO[];
 }
 
-/**
- * DTO para actualizar los datos principales de un evento.
- * Todos los campos son opcionales (PATCH).
- */
-export class ActualizarEventoDTO {
+export class ActualizarOcurrenciaDTO {
     @IsString()
-    @IsOptional()
-    readonly nombre?: string;
-
-    @IsDateString()
-    @IsOptional()
-    readonly fechaInicio?: string;
-
-    @IsDateString()
-    @IsOptional()
-    readonly fechaFinalizacion?: string;
+    @IsNotEmpty()
+    readonly id!: string;
 
     @IsString()
     @IsOptional()
@@ -49,27 +46,48 @@ export class ActualizarEventoDTO {
 
     @IsString()
     @IsOptional()
-    readonly categoria?: string;
+    readonly fechaInicio?: string;
 
-    @IsInt()
-    @Min(1)
+    @IsString()
+    @IsOptional()
+    readonly fechaFinalizacion?: string;
+
+    @IsNumber()
     @IsOptional()
     readonly cantidadPersonas?: number;
 }
 
-/**
- * Asignar o cambiar el encargado de un evento.
- */
+// Y modifica tu clase ActualizarEventoDTO existente así:
+export class ActualizarEventoDTO {
+    @IsString()
+    @IsOptional()
+    readonly titulo?: string;
+
+    @IsString()
+    @IsOptional()
+    readonly categoria?: string;
+
+    @IsString()
+    @IsOptional()
+    readonly estado?: string;
+
+    // 👈 NUEVO CAMPO AÑADIDO
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => ActualizarOcurrenciaDTO)
+    @IsOptional()
+    readonly ocurrencias?: ActualizarOcurrenciaDTO[];
+}
+
 export class AsignarEncargadoDTO {
     @IsString()
     @IsNotEmpty()
     readonly usuarioId!: string;
 }
 
-/**
- * Agregar o quitar participantes de un evento.
- * Recibe un array de IDs de usuario.
- */
 export class ParticipantesDTO {
+    @IsArray()
+    @IsString({ each: true })
+    @IsNotEmpty()
     readonly participantes!: string[];
 }

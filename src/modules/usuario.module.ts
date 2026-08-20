@@ -5,6 +5,12 @@ import { AuthClient } from '../client/AuthClient';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, AuthClient],
+  providers: [{
+      provide: 'IAuthService', 
+      useClass: AuthService,   
+    },{
+      provide: 'IAuthClient', 
+      useClass: AuthClient,   
+    }],
 })
 export class UsuariosModule {}

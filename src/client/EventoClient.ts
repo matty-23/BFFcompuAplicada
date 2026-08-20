@@ -1,61 +1,89 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Inject, Scope } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
+import type { Request } from 'express';
 import { IEventoClient } from '../interfaces/IEventoClient';
 import { EventoViewModel } from '../viewModels/EventoViewModel';
 import { UsuarioViewModel } from '../viewModels/UsuarioViewModel';
+import { OcurrenciaViewModel } from '../viewModels/OcurreciaViewModel';
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3000';
 
 /**
  * Cliente HTTP que se comunica con el Backend REST.
- * Es el único lugar del BFF donde vive la URL del backend.
+ * Al usar Scope.REQUEST, NestJS crea una instancia por cada petición HTTP,
+ * permitiéndonos acceder a los headers/cookies enviados por el Frontend.
  */
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class EventoClient implements IEventoClient {
-
     private readonly baseUrl = `${BACKEND_URL}/api/Eventos`;
 
-    // mapeador
+    // Inyectamos el objeto Request de Express
+    constructor(@Inject(REQUEST) private readonly request: Request) { }
+
+
+    // En EventoClient.ts (Frontend/BFF)
     private mapearEvento(raw: any): EventoViewModel {
-        const encargado = raw.encargado
-            ? new UsuarioViewModel(
-                raw.encargado.id,
-                raw.encargado.nombre,
-                raw.encargado.apellido,
-                raw.encargado.correo,
-                raw.encargado.departamento ?? '',
-                raw.encargado.rol ?? ''
-            )
-            : undefined;
+        // Verifica en la consola (Network Tab) qué objeto JSON llega realmente del servidor
+        console.log("Datos recibidos del backend:", raw);
 
-        const participantes: UsuarioViewModel[] = (raw.participantes ?? []).map(
-            (p: any) => new UsuarioViewModel(p.id, p.nombre, p.apellido, p.correo, p.departamento ?? '', p.rol ?? '')
-        );
+        const ocurrencias = (raw.ocurrencias || []).map((oc: any) => {
+            const encargado = oc.encargado
+                ? new UsuarioViewModel(oc.encargado.id, oc.encargado.nombre, oc.encargado.apellido, oc.encargado.correo, oc.encargado.departamento ?? '', oc.encargado.rol ?? '')
+                : undefined;
 
+            const participantes: UsuarioViewModel[] = (oc.participantes ?? []).map(
+                (p: any) => new UsuarioViewModel(p.id, p.nombre, p.apellido, p.correo, p.departamento ?? '', p.rol ?? '')
+            );
+
+            return new OcurrenciaViewModel(
+                oc.id, oc.idEvento, new Date(oc.fechaInicio), new Date(oc.fechaFinalizacion),
+                oc.lugar, oc.cantidadPersonas, participantes, encargado
+            );
+        });
+        // espera `id, nombre, estado, categoria`.
         return new EventoViewModel(
             raw.id,
-            raw.nombre,
-            new Date(raw.fechaInicio),
-            new Date(raw.fechaFinalizacion),
-            raw.lugar,
-            raw.categoria ?? '',
-            raw.cantidadPersonas,
+            raw.titulo || raw.nombre,
             raw.estado ?? '',
-            participantes,
-            encargado
+            raw.categoria ?? '',
+            ocurrencias
         );
     }
+    // Actualizar endpoints para coincidir con tu nuevo EventoController del Core
 
-    // Manejo de errores HTTP del backend
     private handleError(error: any, contexto: string): never {
+        // Log agregado para tener visibilidad si el microservicio de Eventos rechaza la petición
+        console.error(`❌ [EventoClient - ${contexto}] Error del backend de eventos:`, error);
+
         const status = error?.status ?? HttpStatus.INTERNAL_SERVER_ERROR;
         const mensaje = error?.message ?? `Error al comunicarse con el backend (${contexto})`;
         throw new HttpException(mensaje, status);
     }
 
-    // Métodos
+    private getHeaders(isJson: boolean = true): Record<string, string> {
+        const headers: Record<string, string> = {};
+
+        if (isJson) {
+            headers['Content-Type'] = 'application/json';
+        }
+
+        // Si el frontend envió una cookie de sesión al BFF, la inyectamos en la llamada al backend final
+        if (this.request.headers?.cookie) {
+            headers['cookie'] = this.request.headers.cookie;
+        }
+
+        return headers;
+    }
+
+    // ==========================================
+    // Métodos del cliente
+    // ==========================================
+
     async getAll(page: number = 1): Promise<EventoViewModel[]> {
         try {
-            const res = await fetch(`${this.baseUrl}/${page}/all`);
+            const res = await fetch(`${this.baseUrl}/${page}/all`, {
+                headers: this.getHeaders(false) // Agregamos los headers
+            });
             if (!res.ok) throw { status: res.status, message: await res.text() };
             const data: any[] = await res.json();
             return data.map(e => this.mapearEvento(e));
@@ -64,7 +92,9 @@ export class EventoClient implements IEventoClient {
 
     async getById(id: string): Promise<EventoViewModel | null> {
         try {
-            const res = await fetch(`${this.baseUrl}/${id}`);
+            const res = await fetch(`${this.baseUrl}/${id}`, {
+                headers: this.getHeaders(false) // Agregamos los headers
+            });
             if (res.status === 404) return null;
             if (!res.ok) throw { status: res.status, message: await res.text() };
             const data = await res.json();
@@ -76,7 +106,7 @@ export class EventoClient implements IEventoClient {
         try {
             const res = await fetch(this.baseUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(true), // Content-Type: json + Cookies
                 body: JSON.stringify(dto),
             });
             if (!res.ok) throw { status: res.status, message: await res.text() };
@@ -88,36 +118,46 @@ export class EventoClient implements IEventoClient {
         try {
             const res = await fetch(`${this.baseUrl}/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(true),
                 body: JSON.stringify(dto),
             });
             if (!res.ok) throw { status: res.status, message: await res.text() };
         } catch (e) { this.handleError(e, 'actualizar'); }
     }
 
-    async eliminar(id: string[]): Promise<void> {
+    async eliminar(ids: string[]): Promise<void> {
         try {
-            const res = await fetch(`${this.baseUrl}/${id}`, { method: 'DELETE' });
-            if (!res.ok) throw { status: res.status, message: await res.text() };
-        } catch (e) { this.handleError(e, 'eliminar'); }
+            const res = await fetch(this.baseUrl, { // baseUrl es http://localhost:3000/api/Eventos
+                method: 'DELETE',
+                headers: this.getHeaders(true), // Incluye Content-Type: application/json
+                body: JSON.stringify(ids)
+            });
+
+            if (!res.ok) {
+                throw { status: res.status, message: await res.text() };
+            }
+        } catch (e) {
+            this.handleError(e, 'eliminar');
+        }
     }
-    // En EventoClient (BFF)
+
     async getConFiltros(filtros: any): Promise<EventoViewModel[]> {
         try {
-            // Construimos los query params dinámicamente
             const queryParams = new URLSearchParams(filtros).toString();
-            const res = await fetch(`${this.baseUrl}/filtros?${queryParams}`);
+            const res = await fetch(`${this.baseUrl}/filtros?${queryParams}`, {
+                headers: this.getHeaders(false)
+            });
             if (!res.ok) throw { status: res.status, message: await res.text() };
-
             const data: any[] = await res.json();
             return data.map(e => this.mapearEvento(e));
         } catch (e) { this.handleError(e, 'getConFiltros'); }
     }
-    async asignarEncargado(id: string, usuarioId: string): Promise<EventoViewModel> {
+
+    async asignarEncargado(idEvento: string, idOcurrencia: string, usuarioId: string): Promise<EventoViewModel> {
         try {
-            const res = await fetch(`${this.baseUrl}/${id}/encargado`, {
+            const res = await fetch(`${this.baseUrl}/${idEvento}/ocurrencias/${idOcurrencia}/encargado`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(true),
                 body: JSON.stringify({ usuarioId }),
             });
             if (!res.ok) throw { status: res.status, message: await res.text() };
@@ -125,26 +165,50 @@ export class EventoClient implements IEventoClient {
         } catch (e) { this.handleError(e, 'asignarEncargado'); }
     }
 
-    async agregarParticipantes(id: string, participantes: string[]): Promise<void> {
+    async agregarParticipantes(idOcurrencia: string, participantes: string[]): Promise<void> {
         try {
-            const res = await fetch(`${this.baseUrl}/${id}/AParticipantes`, {
+            const res = await fetch(`${this.baseUrl}/ocurrencias/${idOcurrencia}/AParticipantes`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(true),
                 body: JSON.stringify(participantes),
             });
             if (!res.ok) throw { status: res.status, message: await res.text() };
         } catch (e) { this.handleError(e, 'agregarParticipantes'); }
     }
 
-    async borrarParticipante(id: string, usuarioId: string): Promise<EventoViewModel> {
+    async borrarParticipante(idOcurrencia: string, usuarioId: string): Promise<EventoViewModel> {
         try {
-            const res = await fetch(`${this.baseUrl}/${id}/BParticipantes`, {
+            const res = await fetch(`${this.baseUrl}/ocurrencias/${idOcurrencia}/BParticipantes`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(true),
                 body: JSON.stringify({ usuarioId }),
             });
             if (!res.ok) throw { status: res.status, message: await res.text() };
             return this.mapearEvento(await res.json());
         } catch (e) { this.handleError(e, 'borrarParticipante'); }
+    }
+    // Reemplazá el viejo método 'crear' por estos dos:
+    async crearMono(dto: object): Promise<EventoViewModel> {
+        try {
+            const res = await fetch(`${this.baseUrl}/mono`, {
+                method: 'POST',
+                headers: this.getHeaders(true),
+                body: JSON.stringify(dto),
+            });
+            if (!res.ok) throw { status: res.status, message: await res.text() };
+            return this.mapearEvento(await res.json());
+        } catch (e) { this.handleError(e, 'crearMono'); }
+    }
+
+    async crearMulti(dto: object): Promise<EventoViewModel> {
+        try {
+            const res = await fetch(`${this.baseUrl}/multi`, {
+                method: 'POST',
+                headers: this.getHeaders(true),
+                body: JSON.stringify(dto),
+            });
+            if (!res.ok) throw { status: res.status, message: await res.text() };
+            return this.mapearEvento(await res.json());
+        } catch (e) { this.handleError(e, 'crearMulti'); }
     }
 }

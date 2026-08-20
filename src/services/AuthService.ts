@@ -1,14 +1,16 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { AuthClient} from '../client/AuthClient';
 import { CoreResponse } from '../interfaces/CoreResponse';
 import { Usuario } from '../models/Usuario';
 import { CrearUsuarioDTO, UsuarioDTO } from '../DTO/UsuarioDTO';
 import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
+import {type  IAuthClient } from '../interfaces/IAuthClient';
+import { IAuthService } from '../interfaces/IAuthService';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
 
-  constructor(private readonly coreClient: AuthClient) {}
+  constructor(@Inject('IAuthClient')private readonly coreClient: IAuthClient) {}
 
   async registrarUsuario(dto: CrearUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse> {
     try {
@@ -74,4 +76,13 @@ export class AuthService {
       throw new HttpException('El servidor principal no responde', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+ async validarSesion(headers: Record<string, string>): Promise<CoreResponse> {
+  return this.coreClient.validarSesion(headers);
+}
+
+async cerrarSesion( headers: Record<string, string>): Promise<CoreResponse> {
+  return this.coreClient.cerrarSesion(headers);
+}
+
 }
