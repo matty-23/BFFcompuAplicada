@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { EventoController } from '../controller/EventoController';
-import { EventoService } from '../service/EventoService';
+import { EventoController } from '../controllers/EventoController';
+import { EventoService } from '../services/EventoService';
 import { EventoClient } from '../client/EventoClient';
 
 @Module({

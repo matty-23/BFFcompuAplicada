@@ -1,6 +1,6 @@
 import { EventoViewModel } from '../viewModels/EventoViewModel';
 import { CrearEventoDTO, ActualizarEventoDTO } from '../DTO/EventoDTO';
-import { FiltrosEventoDto } from 'src/DTO/FiltrosDto';
+import { FiltrosEventoDto } from '../DTO/FiltrosDto';
 
 export interface IEventoService {
     getEventos(): Promise<EventoViewModel[]>;

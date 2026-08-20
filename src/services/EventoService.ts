@@ -3,7 +3,7 @@ import type { IEventoService } from '../interfaces/IEventoService';
 import type { IEventoClient } from '../interfaces/IEventoClient';
 import { EventoViewModel } from '../viewModels/EventoViewModel';
 import { CrearEventoDTO, ActualizarEventoDTO } from '../DTO/EventoDTO';
-import { FiltrosEventoDto } from 'src/DTO/FiltrosDto';
+import { FiltrosEventoDto } from '../DTO/FiltrosDto';
 
 @Injectable()
 export class EventoService implements IEventoService {

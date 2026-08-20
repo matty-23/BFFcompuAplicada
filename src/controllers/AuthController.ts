@@ -1,30 +1,24 @@
-import { Controller, Post, Get, Body, Res, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Get, Body, Res, Req, UnauthorizedException, Inject, Injectable, Headers } from '@nestjs/common';
 import type { Response, Request } from 'express';
-import { UsuariosService } from '../service/UsuarioService';
-import type { CrearUsuarioDto } from '../Dtos/UsuarioDTO';
+import { AuthService } from '../services/AuthService';
+import { CrearUsuarioDTO,UsuarioDTO } from '../DTO/UsuarioDTO';
+import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
 
-
-@Controller('usuarios')
-export class UsuariosController {
-  constructor(private readonly usuariosService: UsuariosService) {}
+@Injectable()
+@Controller('auth')
+export class AuthController {
+  constructor(@Inject() private readonly usuariosService: AuthService) {}
 
   @Post('registro')
-  async crearUsuario(
-    @Body() crearUsuarioDto: CrearUsuarioDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const resultado = await this.usuariosService.registrarUsuario(crearUsuarioDto);
+  async registrarUsuario(@Body() crearUsuarioDto: CrearUsuarioDTO,@Headers() headers: Record<string, string>,@Res({ passthrough: true }) res: Response) {
+    const resultado = await this.usuariosService.registrarUsuario(crearUsuarioDto,headers);
 
-    // Si el Core devolvió cookies de sesión, las asignamos en la respuesta del BFF
-    if (resultado.cookies && resultado.cookies.length > 0) {
-      res.setHeader('Set-Cookie', resultado.cookies);
-    }
-
+    if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
+    
     res.status(resultado.status);
     return resultado.data;
   }
-
-  //Endpoint para probar si la cookie de sesión es válida y el usuario tiene acceso a la ruta protegida
+  //Falta terminar
   @Get('perfil')
   obtenerPerfil(@Req() req: Request) {
     const cookies = req.headers.cookie || '';
@@ -41,11 +35,8 @@ export class UsuariosController {
   }
 
   @Post('login')
-  async iniciarSesion(
-    @Body() bodyLogin: any,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const resultado = await this.usuariosService.iniciarSesion(bodyLogin);
+  async iniciarSesion(@Body() bodyLogin: LoginUsuarioDTO,@Headers() headers: Record<string, string>,@Res({ passthrough: true }) res: Response,) {
+    const resultado = await this.usuariosService.iniciarSesion(bodyLogin,headers);
 
     if (resultado.cookies && resultado.cookies.length > 0) {
       res.setHeader('Set-Cookie', resultado.cookies);
@@ -54,7 +45,7 @@ export class UsuariosController {
     res.status(resultado.status);
     return resultado.data ?? { ok: true };
   }
-
+  //Falta conectar al service y demas
   @Post('logout')
   async cerrarSesion(@Res({ passthrough: true }) res: Response) {
 
