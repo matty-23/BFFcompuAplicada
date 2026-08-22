@@ -27,11 +27,10 @@ export class EventoController {
                 data: eventos
             };
         } catch (error) {
-            // Manejo de errores para devolver un estado HTTP adecuado
             return {
                 ok: false,
                 message: 'Error al realizar la búsqueda blanda',
-                error: error.message
+                error: error instanceof Error ? error.message : String(error)
             };
         }
     }

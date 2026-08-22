@@ -16,6 +16,10 @@ export class OcurrenciaDTO {
 
     @IsNumber()
     cantidadPersonas!: number;
+
+    @IsString()
+    @IsOptional()
+    encargadoId?: string;
 }
 
 

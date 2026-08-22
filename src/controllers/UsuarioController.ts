@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import type { IUsuarioService } from '../interfaces/IUsuarioService';
 import { UsuarioDTO } from '../DTO/UsuarioDTO';
 import { CambiarContraseñaDTO } from '../DTO/AuthUsuarioDTO';
+import { GetUsuariosQueryDTO } from '../DTO/UsuarioDTO';
 
 @Controller('api/usuario')
 export class UsuarioController {
@@ -17,19 +18,25 @@ export class UsuarioController {
 
         return resultado.data;
     }
-
     @Get('/filtros')
-    async listarUsuarios(@Query() filtros: Record<string, string>, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
+    async listarUsuarios(
+        @Query() filtros: GetUsuariosQueryDTO,
+        @Headers() headers: Record<string, string>,
+        @Res({ passthrough: true }) res: Response
+    ) {
         const resultado = await this.usuarioService.listarUsuarios(headers, filtros);
 
-        if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
+        if (resultado.cookies?.length) {
+            res.setHeader('Set-Cookie', resultado.cookies);
+        }
+
         res.status(resultado.status);
 
         return resultado.data;
     }
 
     @Get(':id')
-    async obtenerUsuario(@Param('id') id: string,@Headers() headers: Record<string, string>,@Res({ passthrough: true }) res: Response) {
+    async obtenerUsuario(@Param('id') id: string, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
         const resultado = await this.usuarioService.obtenerUsuario(headers, id);
 
         if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
@@ -39,8 +46,8 @@ export class UsuarioController {
     }
 
     @Patch()
-    async actualizarUsuario(@Body() usuarioDto: UsuarioDTO,@Headers() headers: Record<string, string>,@Res({ passthrough: true }) res: Response) {
-        
+    async actualizarUsuario(@Body() usuarioDto: UsuarioDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
+
         const resultado = await this.usuarioService.actualizarUsuario(usuarioDto, headers);
 
         if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
@@ -50,7 +57,7 @@ export class UsuarioController {
     }
 
     @Post('/cambiar/contra')
-    async actualizarContrasena( @Body() body: CambiarContraseñaDTO,@Headers() headers: Record<string, string>,@Res({ passthrough: true }) res: Response) {
+    async actualizarContrasena(@Body() body: CambiarContraseñaDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
         const resultado = await this.usuarioService.actualizarContraseña(body, headers);
 
         if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
@@ -60,7 +67,7 @@ export class UsuarioController {
     }
 
     @Delete(':id')
-    async eliminarUsuario(@Param('id') id: string,@Headers() headers: Record<string, string>,@Res({ passthrough: true }) res: Response) {
+    async eliminarUsuario(@Param('id') id: string, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
         const resultado = await this.usuarioService.eliminarUsuario(headers, id);
 
         if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);

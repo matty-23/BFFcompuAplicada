@@ -8,11 +8,6 @@ import { OcurrenciaViewModel } from '../viewModels/OcurreciaViewModel';
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3000';
 
-/**
- * Cliente HTTP que se comunica con el Backend REST.
- * Al usar Scope.REQUEST, NestJS crea una instancia por cada petición HTTP,
- * permitiéndonos acceder a los headers/cookies enviados por el Frontend.
- */
 @Injectable({ scope: Scope.REQUEST })
 export class EventoClient implements IEventoClient {
     private readonly baseUrl = `${BACKEND_URL}/api/Eventos`;
@@ -24,7 +19,6 @@ export class EventoClient implements IEventoClient {
     // En EventoClient.ts (Frontend/BFF)
     private mapearEvento(raw: any): EventoViewModel {
         // Verifica en la consola (Network Tab) qué objeto JSON llega realmente del servidor
-        console.log("Datos recibidos del backend:", raw);
 
         const ocurrencias = (raw.ocurrencias || []).map((oc: any) => {
             const encargado = oc.encargado
@@ -75,9 +69,7 @@ export class EventoClient implements IEventoClient {
         return headers;
     }
 
-    // ==========================================
     // Métodos del cliente
-    // ==========================================
 
     async getAll(page: number = 1): Promise<EventoViewModel[]> {
         try {
@@ -102,17 +94,27 @@ export class EventoClient implements IEventoClient {
         } catch (e) { this.handleError(e, 'getById'); }
     }
 
-    async crear(dto: object): Promise<EventoViewModel> {
-        try {
-            const res = await fetch(this.baseUrl, {
-                method: 'POST',
-                headers: this.getHeaders(true), // Content-Type: json + Cookies
-                body: JSON.stringify(dto),
-            });
-            if (!res.ok) throw { status: res.status, message: await res.text() };
-            return this.mapearEvento(await res.json());
-        } catch (e) { this.handleError(e, 'crear'); }
+async crear(dto: object): Promise<EventoViewModel> {
+    try {
+        // 🔍 LOG: Ver qué objeto llega y cómo queda transformado a string en JSON.stringify
+        const bodyJSON = JSON.stringify(dto);
+
+        const res = await fetch(this.baseUrl, {
+            method: 'POST',
+            headers: this.getHeaders(true), // Content-Type: json + Cookies
+            body: bodyJSON,
+        });
+
+        if (!res.ok) throw { status: res.status, message: await res.text() };
+
+        const data = await res.json();
+
+        return this.mapearEvento(data);
+    } catch (e) { 
+        console.error('[CLIENT API crear] Error en la petición HTTP:', e);
+        this.handleError(e, 'crear'); 
     }
+}
 
     async actualizar(id: string, dto: object): Promise<void> {
         try {
@@ -143,14 +145,33 @@ export class EventoClient implements IEventoClient {
 
     async getConFiltros(filtros: any): Promise<EventoViewModel[]> {
         try {
-            const queryParams = new URLSearchParams(filtros).toString();
-            const res = await fetch(`${this.baseUrl}/filtros?${queryParams}`, {
-                headers: this.getHeaders(false)
+            const params = new URLSearchParams();
+            Object.entries(filtros).forEach(([key, value]) => {
+                if (value === undefined || value === null || value === '') return;
+                
+                if (Array.isArray(value)) {
+                    value.forEach((item) => {params.append(key, String(item));});
+                } else {
+                    params.append(key, String(value));
+                }
             });
-            if (!res.ok) throw { status: res.status, message: await res.text() };
+
+            const res = await fetch(`${this.baseUrl}/filtros?${params.toString()}`,{headers: this.getHeaders(false)});
+            if (!res.ok) {
+                throw {
+                    status: res.status,
+                    message: await res.text()
+                };
+            }
+
             const data: any[] = await res.json();
+
             return data.map(e => this.mapearEvento(e));
-        } catch (e) { this.handleError(e, 'getConFiltros'); }
+
+        } catch (e) {
+            this.handleError(e, 'getConFiltros');
+            return [];
+        }
     }
 
     async asignarEncargado(idEvento: string, idOcurrencia: string, usuarioId: string): Promise<EventoViewModel> {
