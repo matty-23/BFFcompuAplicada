@@ -20,6 +20,10 @@ export class OcurrenciaDTO {
     @IsString()
     @IsOptional()
     encargadoId?: string;
+    
+    @IsString()
+    @IsOptional()
+    participantes?: string[];
 }
 
 
