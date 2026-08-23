@@ -94,27 +94,27 @@ export class EventoClient implements IEventoClient {
         } catch (e) { this.handleError(e, 'getById'); }
     }
 
-async crear(dto: object): Promise<EventoViewModel> {
-    try {
-        // 🔍 LOG: Ver qué objeto llega y cómo queda transformado a string en JSON.stringify
-        const bodyJSON = JSON.stringify(dto);
+    async crear(dto: object): Promise<EventoViewModel> {
+        try {
+            // 🔍 LOG: Ver qué objeto llega y cómo queda transformado a string en JSON.stringify
+            const bodyJSON = JSON.stringify(dto);
 
-        const res = await fetch(this.baseUrl, {
-            method: 'POST',
-            headers: this.getHeaders(true), // Content-Type: json + Cookies
-            body: bodyJSON,
-        });
+            const res = await fetch(this.baseUrl, {
+                method: 'POST',
+                headers: this.getHeaders(true), // Content-Type: json + Cookies
+                body: bodyJSON,
+            });
 
-        if (!res.ok) throw { status: res.status, message: await res.text() };
+            if (!res.ok) throw { status: res.status, message: await res.text() };
 
-        const data = await res.json();
+            const data = await res.json();
 
-        return this.mapearEvento(data);
-    } catch (e) { 
-        console.error('[CLIENT API crear] Error en la petición HTTP:', e);
-        this.handleError(e, 'crear'); 
+            return this.mapearEvento(data);
+        } catch (e) {
+            console.error('[CLIENT API crear] Error en la petición HTTP:', e);
+            this.handleError(e, 'crear');
+        }
     }
-}
 
     async actualizar(id: string, dto: object): Promise<void> {
         try {
@@ -148,15 +148,15 @@ async crear(dto: object): Promise<EventoViewModel> {
             const params = new URLSearchParams();
             Object.entries(filtros).forEach(([key, value]) => {
                 if (value === undefined || value === null || value === '') return;
-                
+
                 if (Array.isArray(value)) {
-                    value.forEach((item) => {params.append(key, String(item));});
+                    value.forEach((item) => { params.append(key, String(item)); });
                 } else {
                     params.append(key, String(value));
                 }
             });
 
-            const res = await fetch(`${this.baseUrl}/filtros?${params.toString()}`,{headers: this.getHeaders(false)});
+            const res = await fetch(`${this.baseUrl}/filtros?${params.toString()}`, { headers: this.getHeaders(false) });
             if (!res.ok) {
                 throw {
                     status: res.status,
