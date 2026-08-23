@@ -80,18 +80,34 @@ export class UsuarioClient implements IUsuarioClient {
         };
     }
 
-    async listarUsuarios(headers: Record<string, any>, filtros?: Record<string, string>): Promise<CoreResponse> {
-        let url = `${process.env.coreBaseUrl}/api/usuarios`;
-        if (filtros && Object.keys(filtros).length) {
-            url += `?${new URLSearchParams(filtros).toString()}`;
+    async listarUsuarios(headers: Record<string, any>,filtros?: Record<string, string | string[]>): Promise<CoreResponse> {
+        const params = new URLSearchParams();
+
+        if (filtros) {
+            Object.entries(filtros).forEach(([key, value]) => {
+                if (value === undefined || value === null) {
+                    return;
+                }
+
+                if (Array.isArray(value)) {
+                    value.forEach(item => params.append(key, item));
+                } else {
+                    params.append(key, value);
+                }
+            });
         }
+
+        const queryString = params.toString();
+
+        const url = `${process.env.coreBaseUrl}/api/usuarios${queryString ? `?${queryString}` : ''
+            }`;
 
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                ...(headers.origin && { 'Origin': headers.origin }),
-                ...(headers.cookie && { 'Cookie': headers.cookie }),
-            }
+                ...(headers.origin && { Origin: headers.origin }),
+                ...(headers.cookie && { Cookie: headers.cookie }),
+            },
         });
 
         const data = await response.json().catch(() => null);
@@ -102,6 +118,7 @@ export class UsuarioClient implements IUsuarioClient {
             cookies: this.extraerCookies(response),
         };
     }
+
 
     async eliminarUsuario(headers: Record<string, any>, id: string) {
         const url = `${process.env.coreBaseUrl}/api/usuario/${id}`;

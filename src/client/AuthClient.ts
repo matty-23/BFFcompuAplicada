@@ -32,7 +32,6 @@ export class AuthClient implements IAuthClient {
       body: JSON.stringify(body),
     });
     const data = await response.json().catch(() => null);
-    console.log('COOKIES CORE:', data.cookies);
     return {
       status: response.status,
       data,
@@ -45,11 +44,10 @@ export class AuthClient implements IAuthClient {
 
     const newHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Origin': 'http://localhost:3001',
     };
 
-    if (headers.origin) {
-      newHeaders['Origin'] = headers.origin;
-    }
+
 
     const response = await fetch(url, {
       method: 'POST',
