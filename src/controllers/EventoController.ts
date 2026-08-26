@@ -5,9 +5,10 @@ import { filtrosEventoDto } from '../DTO/FiltrosDto';
 import { RequierePermiso } from '../decorators/permisos.decorator.js';
 import { PermissionsGuard } from '../guards/permissions.guard';
 import { Permiso } from '../models/roles/Permisos';
+import { AuthGuard } from "../guards/auth.guard";
 
 @Controller('api/eventos')
-@UseGuards(PermissionsGuard)
+@UseGuards(AuthGuard,PermissionsGuard)
 export class EventoController {
 
     constructor(@Inject('IEventoService') private readonly eventoService: IEventoService) { }

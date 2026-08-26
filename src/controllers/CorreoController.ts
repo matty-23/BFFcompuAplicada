@@ -4,9 +4,10 @@ import {CorreoDTO,CorreoConfirmacionCuentaDTO, CorreoRecuperacionContrasenaDTO,}
 import { RequierePermiso } from '../decorators/permisos.decorator.js';
 import { PermissionsGuard } from "../guards/permissions.guard";
 import { Permiso } from "../models/roles/Permisos";
+import { AuthGuard } from "../guards/auth.guard";
 
 @Controller('api/correo')
-@UseGuards(PermissionsGuard)
+@UseGuards(AuthGuard,PermissionsGuard)
 export class CorreoController {
   constructor(@Inject('ICorreoService') private readonly correoService: ICorreoService,) {}
 
