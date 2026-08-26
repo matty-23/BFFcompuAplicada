@@ -12,7 +12,7 @@ export class CorreoController {
 
   @Post('/notificacion')
   @HttpCode(HttpStatus.OK)
-  @RequierePermiso(Permiso.LISTAR_EVENTOS)
+  @RequierePermiso(Permiso.RECIBIR_NOTIFICACIONES)
   async enviarNotificacion(@Body() correoDto: CorreoDTO,@Headers() headers: Record<string, string>,) {
     const enviado = await this.correoService.enviarNotificacion(correoDto, headers);
 
@@ -23,6 +23,7 @@ export class CorreoController {
 
   @Post('/cuenta/confirmacion')
   @HttpCode(HttpStatus.OK)
+  @RequierePermiso(Permiso.RECIBIR_NOTIFICACIONES)
   async enviarCorreoConfirmacionCuenta(@Body() correoDto: CorreoConfirmacionCuentaDTO,@Headers() headers: Record<string, string>, ) {
     const enviado = await this.correoService.enviarCorreoConfirmacionCuenta(correoDto, headers);
 
@@ -33,6 +34,7 @@ export class CorreoController {
 
   @Post('/recuperacion')
   @HttpCode(HttpStatus.OK)
+  @RequierePermiso(Permiso.RECIBIR_NOTIFICACIONES)
   async enviarCorreoRecuperacionContrasena(@Body() correoDto: CorreoRecuperacionContrasenaDTO,@Headers() headers: Record<string, string>,) {
     const enviado = await this.correoService.enviarCorreoRecuperacionContraseña(correoDto, headers);
 
@@ -43,6 +45,7 @@ export class CorreoController {
 
   @Post('/solicitud/confirmacion')
   @HttpCode(HttpStatus.OK)
+  @RequierePermiso(Permiso.RECIBIR_NOTIFICACIONES)
   async enviarCorreoConfirmacionSolicitudAEvento(@Body() correoDto: CorreoDTO, @Headers() headers: Record<string, string>,) {
     const enviado =
       await this.correoService.enviarCorreoConfirmacionSolicitudAEvento(
