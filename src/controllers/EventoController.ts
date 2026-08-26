@@ -10,9 +10,7 @@ import { Permiso } from '../models/roles/Permisos';
 @UseGuards(PermissionsGuard)
 export class EventoController {
 
-    constructor(
-        @Inject('IEventoService') private readonly eventoService: IEventoService
-    ) { }
+    constructor(@Inject('IEventoService') private readonly eventoService: IEventoService) { }
 
     // GET /api/eventos
     @Get()
@@ -23,6 +21,7 @@ export class EventoController {
     }
 
     @Get('filtros')
+    @RequierePermiso(Permiso.LISTAR_EVENTOS)
     async busquedaBlanda(@Query() filtros: filtrosEventoDto) {
         try {
             const eventos = await this.eventoService.filtrado(filtros);
@@ -42,6 +41,7 @@ export class EventoController {
     }
     // GET /api/eventos/:id
     @Get(':id')
+    @RequierePermiso(Permiso.LISTAR_EVENTOS,Permiso.VER_DETALLES_EVENTOS,Permiso.DEJAR_COMENTARIOS_EVENTOS,Permiso.MODIFICAR_EVENTOS)
     async getById(@Param('id') id: string) {
         const evento = await this.eventoService.getEventoById(id);
         if (!evento) throw new NotFoundException(`Evento con ID ${id} no encontrado.`);

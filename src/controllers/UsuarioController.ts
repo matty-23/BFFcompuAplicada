@@ -14,7 +14,7 @@ export class UsuarioController {
     constructor(@Inject('IUsuarioService') private readonly usuarioService: IUsuarioService) { }
 
     @Get('/todos')
-    @RequierePermiso(Permiso.LISTAR_EVENTOS)
+    @RequierePermiso(Permiso.LISTAR_USUARIOS)
     async obtenerUsuarios(@Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
         const resultado = await this.usuarioService.obtenerUsuarios(headers);
 
@@ -24,11 +24,8 @@ export class UsuarioController {
         return resultado.data;
     }
     @Get('/filtros')
-    async listarUsuarios(
-        @Query() filtros: GetUsuariosQueryDTO,
-        @Headers() headers: Record<string, string>,
-        @Res({ passthrough: true }) res: Response
-    ) {
+    @RequierePermiso(Permiso.LISTAR_USUARIOS)
+    async listarUsuarios(@Query() filtros: GetUsuariosQueryDTO, @Headers() headers: Record<string, string>,@Res({ passthrough: true }) res: Response) {
         const resultado = await this.usuarioService.listarUsuarios(headers, filtros);
 
         if (resultado.cookies?.length) {
@@ -41,6 +38,7 @@ export class UsuarioController {
     }
 
     @Get(':id')
+    @RequierePermiso(Permiso.MODIFICAR_USUARIO_PROPIO)
     async obtenerUsuario(@Param('id') id: string, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
         const resultado = await this.usuarioService.obtenerUsuario(headers, id);
 
@@ -51,6 +49,7 @@ export class UsuarioController {
     }
 
     @Patch()
+    @RequierePermiso(Permiso.MODIFICAR_USUARIO,Permiso.MODIFICAR_USUARIO_PROPIO)
     async actualizarUsuario(@Body() usuarioDto: UsuarioDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
 
         const resultado = await this.usuarioService.actualizarUsuario(usuarioDto, headers);
@@ -62,6 +61,7 @@ export class UsuarioController {
     }
 
     @Post('/cambiar/contra')
+    @RequierePermiso(Permiso.MODIFICAR_USUARIO_PROPIO)
     async actualizarContrasena(@Body() body: CambiarContraseñaDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
         const resultado = await this.usuarioService.actualizarContraseña(body, headers);
 
@@ -72,6 +72,7 @@ export class UsuarioController {
     }
 
     @Delete(':id')
+    @RequierePermiso(Permiso.ELIMINAR_USUARIO)
     async eliminarUsuario(@Param('id') id: string, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
         const resultado = await this.usuarioService.eliminarUsuario(headers, id);
 
