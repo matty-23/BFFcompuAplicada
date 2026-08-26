@@ -1,11 +1,10 @@
-import { Controller, Post, Get, Body, Res, Req, UnauthorizedException, Inject, Injectable, Headers } from '@nestjs/common';
+import { Controller, Post, Get, Body, Res, UseGuards, UnauthorizedException, Inject, Injectable, Headers } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import type{ IAuthService } from '../interfaces/IAuthService';
 import { CrearUsuarioDTO, UsuarioDTO } from '../DTO/UsuarioDTO';
 import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
 
 @Controller('/auth')
-
 export class AuthController {
   constructor(@Inject('IAuthService') private readonly authService: IAuthService) { }
 

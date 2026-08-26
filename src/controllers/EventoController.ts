@@ -1,8 +1,13 @@
-import { Controller, Query, Get, Post, Put, Delete, Patch, Param, Body, Inject, NotFoundException, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Query, Get, Post, Put, Delete, Patch, Param, Body, Inject, NotFoundException, BadRequestException, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import type { IEventoService } from '../interfaces/IEventoService';
 import { CrearEventoMultiDTO, ActualizarEventoDTO, AsignarEncargadoDTO, ParticipantesDTO } from '../DTO/EventoDTO';
 import { filtrosEventoDto } from '../DTO/FiltrosDto';
+import { RequierePermiso } from '../decorators/permisos.decorator.js';
+import { PermissionsGuard } from '../guards/permissions.guard';
+import { Permiso } from '../models/roles/Permisos';
+
 @Controller('api/eventos')
+@UseGuards(PermissionsGuard)
 export class EventoController {
 
     constructor(
@@ -11,6 +16,7 @@ export class EventoController {
 
     // GET /api/eventos
     @Get()
+    @RequierePermiso(Permiso.LISTAR_EVENTOS)
     async getAll() {
         const eventos = await this.eventoService.getEventos();
         return eventos.map(e => e.toJSON());

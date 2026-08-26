@@ -1,13 +1,18 @@
-import { Controller, Post, Body, Headers, Inject, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Headers, Inject, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import type { ICorreoService } from '../interfaces/ICorreoService';
 import {CorreoDTO,CorreoConfirmacionCuentaDTO, CorreoRecuperacionContrasenaDTO,} from '../DTO/CorreoDTO';
+import { RequierePermiso } from '../decorators/permisos.decorator.js';
+import { PermissionsGuard } from "../guards/permissions.guard";
+import { Permiso } from "../models/roles/Permisos";
 
 @Controller('api/correo')
+@UseGuards(PermissionsGuard)
 export class CorreoController {
   constructor(@Inject('ICorreoService') private readonly correoService: ICorreoService,) {}
 
   @Post('/notificacion')
   @HttpCode(HttpStatus.OK)
+  @RequierePermiso(Permiso.LISTAR_EVENTOS)
   async enviarNotificacion(@Body() correoDto: CorreoDTO,@Headers() headers: Record<string, string>,) {
     const enviado = await this.correoService.enviarNotificacion(correoDto, headers);
 

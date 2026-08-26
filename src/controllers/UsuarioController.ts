@@ -1,15 +1,20 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, Headers, Res, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, Headers, Res, Inject,UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import type { IUsuarioService } from '../interfaces/IUsuarioService';
 import { UsuarioDTO } from '../DTO/UsuarioDTO';
 import { CambiarContraseñaDTO } from '../DTO/AuthUsuarioDTO';
 import { GetUsuariosQueryDTO } from '../DTO/UsuarioDTO';
+import { RequierePermiso } from '../decorators/permisos.decorator.js';
+import { PermissionsGuard } from '../guards/permissions.guard';
+import { Permiso } from '../models/roles/Permisos';
 
 @Controller('api/usuario')
+@UseGuards(PermissionsGuard)
 export class UsuarioController {
     constructor(@Inject('IUsuarioService') private readonly usuarioService: IUsuarioService) { }
 
     @Get('/todos')
+    @RequierePermiso(Permiso.LISTAR_EVENTOS)
     async obtenerUsuarios(@Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
         const resultado = await this.usuarioService.obtenerUsuarios(headers);
 
