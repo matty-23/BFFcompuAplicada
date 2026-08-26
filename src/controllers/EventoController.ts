@@ -51,6 +51,7 @@ export class EventoController {
     // POST /api/eventos
     @Post()
     @HttpCode(HttpStatus.CREATED)
+    @RequierePermiso(Permiso.AÑADIR_EVENTOS)
     async crear(@Body() dto: CrearEventoMultiDTO) {
         const evento = await this.eventoService.crearEventoMulti(dto);
         if (!evento) throw new BadRequestException('Error al crear el evento.');
@@ -60,6 +61,7 @@ export class EventoController {
     // PUT /api/eventos/:id
     @Put(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
+    @RequierePermiso(Permiso.MODIFICAR_EVENTOS,Permiso.DEJAR_COMENTARIOS_EVENTOS,Permiso.MODIFICAR_COMENTARIOS_EVENTOS,Permiso.ELIMINAR_COMENTARIOS_EVENTOS)
     async actualizar(@Param('id') id: string, @Body() dto: ActualizarEventoDTO) {
         await this.eventoService.actualizarEvento(id, dto);
     }
@@ -67,12 +69,14 @@ export class EventoController {
     // DELETE /api/eventos/:id
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
+    @RequierePermiso(Permiso.ELIMINAR_EVENTOS)
     async eliminar(@Param('id') id: string) {
         await this.eventoService.eliminarEvento([id]);
     }
 
     // PATCH /api/eventos/:id/encargado
     @Patch(':idEvento/ocurrencias/:idOcurrencia/encargado')
+    @RequierePermiso(Permiso.AÑADIR_PARTICIPANTE)
     async asignarEncargado(
         @Param('idEvento') idEvento: string,
         @Param('idOcurrencia') idOcurrencia: string,
@@ -86,11 +90,13 @@ export class EventoController {
     // PATCH /api/eventos/ocurrencias/:idOcurrencia/participantes
     @Patch('ocurrencias/:idOcurrencia/participantes')
     @HttpCode(HttpStatus.NO_CONTENT)
+    @RequierePermiso(Permiso.AÑADIR_PARTICIPANTE)
     async agregarParticipantes(@Param('idOcurrencia') idOcurrencia: string, @Body() body: { participantes: string[] }) {
         await this.eventoService.agregarParticipantes(idOcurrencia, body.participantes);
     }
 
     // DELETE /api/eventos/ocurrencias/:idOcurrencia/participantes/:usuarioId
+    @RequierePermiso(Permiso.ELIMINAR_PARTICIPANTE)
     @Delete('ocurrencias/:idOcurrencia/participantes/:usuarioId')
     async borrarParticipante(@Param('idOcurrencia') idOcurrencia: string, @Param('usuarioId') usuarioId: string) {
         await this.eventoService.borrarParticipante(idOcurrencia, usuarioId);

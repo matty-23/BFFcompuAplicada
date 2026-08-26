@@ -3,6 +3,8 @@ export enum Permiso {
     AÑADIR_USUARIO = "añadir_usuario",
     ELIMINAR_USUARIO = "eliminar_usuario",
     MODIFICAR_USUARIO = "modificar_usuario",
+    AÑADIR_PARTICIPANTE = "añadir_usuario",
+    ELIMINAR_PARTICIPANTE = "eliminar_usuario",
     MODIFICAR_USUARIO_PROPIO = "modificar_usuario_propio",
     GENERAR_SOLICITUDES = 'generar_solicitudes',
     CANCELAR_SOLICITUDES = 'cancelar_solicitudes',
