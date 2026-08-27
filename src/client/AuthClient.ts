@@ -22,6 +22,7 @@ export class AuthClient implements IAuthClient {
   //Esto puede quedar igual al IniciarSesion con el tema cookies
   async registrarUsuario(body: RegistrarUsuarioDTO, headers: Record<string, any>): Promise<CoreResponse> {
     const url = `${process.env.coreBaseUrl}/api/auth/sign-up/email`;
+    console.log(headers.origin);
     const response = await fetch(url, {
       method: 'POST',
       headers: {

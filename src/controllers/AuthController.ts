@@ -1,8 +1,7 @@
 import { Controller, Post, Get, Body, Res, UseGuards, UnauthorizedException, Inject, Injectable, Headers } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import type{ IAuthService } from '../interfaces/IAuthService';
-import { CrearUsuarioDTO, UsuarioDTO } from '../DTO/UsuarioDTO';
-import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
+import { LoginUsuarioDTO, RegistrarUsuarioDTO } from '../DTO/AuthUsuarioDTO';
 import { AuthGuard } from '../guards/auth.guard';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { type Cache } from 'cache-manager';
@@ -12,7 +11,7 @@ export class AuthController {
   constructor(@Inject('IAuthService') private readonly authService: IAuthService,@Inject(CACHE_MANAGER) private cacheManager: Cache) { }
 
   @Post('/registro')
-  async registrarUsuario(@Body() crearUsuarioDto: CrearUsuarioDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
+  async registrarUsuario(@Body() crearUsuarioDto: RegistrarUsuarioDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
     const resultado = await this.authService.registrarUsuario(crearUsuarioDto, headers);
 
     if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);

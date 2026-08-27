@@ -1,9 +1,8 @@
-import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
+import { LoginUsuarioDTO, RegistrarUsuarioDTO } from '../DTO/AuthUsuarioDTO';
 import { CoreResponse } from './CoreResponse';
-import { CrearUsuarioDTO } from '../DTO/UsuarioDTO';
 
 export interface IAuthService{
-    registrarUsuario(dto: CrearUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse>;
+    registrarUsuario(dto: RegistrarUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse>;
     iniciarSesion(bodyLogin: LoginUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse>;
     validarSesion(headers: Record<string, string>): Promise<CoreResponse>;
     cerrarSesion(headers: Record<string, string>);

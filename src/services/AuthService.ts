@@ -2,7 +2,7 @@ import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { CoreResponse } from '../interfaces/CoreResponse';
 import { Usuario } from '../models/Usuario';
 import { CrearUsuarioDTO, UsuarioDTO } from '../DTO/UsuarioDTO';
-import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
+import { LoginUsuarioDTO, RegistrarUsuarioDTO } from '../DTO/AuthUsuarioDTO';
 import {type  IAuthClient } from '../interfaces/IAuthClient';
 import { IAuthService } from '../interfaces/IAuthService';
 
@@ -11,12 +11,12 @@ export class AuthService implements IAuthService {
 
   constructor(@Inject('IAuthClient')private readonly coreClient: IAuthClient) {}
 
-  async registrarUsuario(dto: CrearUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse> {
+  async registrarUsuario(dto: RegistrarUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse> {
     try {
       const bodyAuth = {
-        email: dto.correo,
-        password: dto.contraseña,
-        name: dto.nombre,
+        email: dto.email,
+        password: dto.password,
+        name: dto.name,
         apellido:dto.apellido,
         departamento: dto.departamento,
       };
@@ -30,11 +30,11 @@ export class AuthService implements IAuthService {
       const authUser = resultadoAuth.data.user || resultadoAuth.data;
       const nuevoUsuario = new Usuario(
         authUser.id || '',
-        dto.nombre,
+        dto.name,
         dto.apellido,
-        dto.correo,
+        dto.email,
         dto.departamento,
-        dto.rol,
+        authUser.rol,
         ""
       );
 
