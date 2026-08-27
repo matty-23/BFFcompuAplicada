@@ -1,8 +1,7 @@
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { CoreResponse } from '../interfaces/CoreResponse';
 import { Usuario } from '../models/Usuario';
-import { CrearUsuarioDTO, UsuarioDTO } from '../DTO/UsuarioDTO';
-import { LoginUsuarioDTO, RegistrarUsuarioDTO } from '../DTO/AuthUsuarioDTO';
+import { LoginUsuarioDTO, RegistrarUsuarioDTO,CorreoRecuperacionContrasenaDTO,RestablecerContrasenaDTO } from '../DTO/AuthUsuarioDTO';
 import {type  IAuthClient } from '../interfaces/IAuthClient';
 import { IAuthService } from '../interfaces/IAuthService';
 
@@ -84,4 +83,37 @@ async cerrarSesion( headers: Record<string, string>): Promise<CoreResponse> {
   return this.coreClient.cerrarSesion(headers);
 }
 
+async solicitarRecuperacion(body: CorreoRecuperacionContrasenaDTO, headers: Record<string, string>): Promise<CoreResponse> {
+    try {
+      const resultado = await this.coreClient.solicitarRecuperacion(body, headers);
+      if (resultado.status >= 400) {
+        return resultado;
+      }
+      return {
+        status: resultado.status,
+        data: resultado.data,
+        cookies: resultado.cookies,
+      };
+    } catch (error) {
+      console.error('Error conectando al Core en solicitarRecuperacion:', error);
+      throw new HttpException('El servidor principal no responde', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+async restablecerContrasena(body: RestablecerContrasenaDTO, headers: Record<string, string>): Promise<CoreResponse> {
+    try {
+      const resultado = await this.coreClient.restablecerContrasena(body, headers);
+      if (resultado.status >= 400) {
+        return resultado;
+      }
+      return {
+        status: resultado.status,
+        data: resultado.data,
+        cookies: resultado.cookies,
+      };
+    } catch (error) {
+      console.error('Error conectando al Core en restablecerContrasena:', error);
+      throw new HttpException('El servidor principal no responde', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

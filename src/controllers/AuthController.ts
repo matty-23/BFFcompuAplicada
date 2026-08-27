@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, Res, UseGuards, UnauthorizedException, Inject, Injectable, Headers } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import type{ IAuthService } from '../interfaces/IAuthService';
-import { LoginUsuarioDTO, RegistrarUsuarioDTO } from '../DTO/AuthUsuarioDTO';
+import { LoginUsuarioDTO, RegistrarUsuarioDTO,CorreoRecuperacionContrasenaDTO,RestablecerContrasenaDTO } from '../DTO/AuthUsuarioDTO';
 import { AuthGuard } from '../guards/auth.guard';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { type Cache } from 'cache-manager';
@@ -53,6 +53,26 @@ async validarPerfil(@Headers() headers: Record<string, string>) {
 
     if (resultado.cookies?.length) res.setHeader('Set-Cookie', resultado.cookies);
     res.status(resultado.status);
+    return resultado.data;
+  }
+
+  @Post('/recuperacion')
+  async solicitarRecuperacion(@Body() body: CorreoRecuperacionContrasenaDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
+    const resultado = await this.authService.solicitarRecuperacion(body, headers);
+    
+    if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
+    res.status(resultado.status);
+    
+    return resultado.data;
+  }
+
+  @Post('/restablecer')
+  async restablecerContrasena(@Body() body: RestablecerContrasenaDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
+    const resultado = await this.authService.restablecerContrasena(body, headers);
+    
+    if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
+    res.status(resultado.status);
+    
     return resultado.data;
   }
 }

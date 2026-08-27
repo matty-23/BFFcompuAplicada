@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Headers, Inject, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import type { ICorreoService } from '../interfaces/ICorreoService';
-import {CorreoDTO,CorreoConfirmacionCuentaDTO, CorreoRecuperacionContrasenaDTO,} from '../DTO/CorreoDTO';
+import {CorreoDTO,CorreoConfirmacionCuentaDTO, } from '../DTO/CorreoDTO';
 import { RequierePermiso } from '../decorators/permisos.decorator.js';
 import { PermissionsGuard } from "../guards/permissions.guard";
 import { Permiso } from "../models/roles/Permisos";
@@ -31,17 +31,6 @@ export class CorreoController {
     return enviado
       ? { ok: true, mensaje: 'Correo de confirmación enviado correctamente.' }
       : { ok: false, mensaje: 'No se pudo enviar el correo de confirmación.' };
-  }
-
-  @Post('/recuperacion')
-  @HttpCode(HttpStatus.OK)
-  @RequierePermiso(Permiso.RECIBIR_NOTIFICACIONES)
-  async enviarCorreoRecuperacionContrasena(@Body() correoDto: CorreoRecuperacionContrasenaDTO,@Headers() headers: Record<string, string>,) {
-    const enviado = await this.correoService.enviarCorreoRecuperacionContraseña(correoDto, headers);
-
-    return enviado
-      ? { ok: true, mensaje: 'Correo de recuperación enviado correctamente.' }
-      : { ok: false, mensaje: 'No se pudo enviar el correo de recuperación.' };
   }
 
   @Post('/solicitud/confirmacion')

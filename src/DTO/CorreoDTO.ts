@@ -41,24 +41,6 @@ export class ArchivoAdjuntoDTO {
     readonly content!: string; 
 }
 
-export class CorreoRecuperacionContrasenaDTO {
-    @IsString()
-    @IsNotEmpty()
-    readonly destinatario!: string;
-
-    @IsNotEmpty()
-    @IsString()
-    readonly asunto!: string;
-
-    @IsNotEmpty()
-    @IsString()
-    readonly linkRecuperacion!: string;
-
-    @IsNotEmpty()
-    @IsString()
-    readonly mensaje!: string;
-}
-
 export class CorreoConfirmacionCuentaDTO {
     @IsString()
     @IsNotEmpty()

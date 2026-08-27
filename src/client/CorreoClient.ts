@@ -1,5 +1,5 @@
 import { ICorreoClient } from "../interfaces/ICorreoClient"
-import { CorreoDTO, CorreoConfirmacionCuentaDTO, CorreoRecuperacionContrasenaDTO } from "../DTO/CorreoDTO"
+import { CorreoDTO, CorreoConfirmacionCuentaDTO} from "../DTO/CorreoDTO"
 
 export class CorreoClient implements ICorreoClient {
 
@@ -35,35 +35,6 @@ export class CorreoClient implements ICorreoClient {
 
     async enviarCorreoCuenta(correo: CorreoConfirmacionCuentaDTO, headers: Record<string, any>): Promise<boolean> {
         const url = `${process.env.coreBaseUrl}/notificaciones/cuenta/confirmacion`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(headers.origin && { 'Origin': headers.origin }),
-                ...(headers.cookie && { 'Cookie': headers.cookie }),
-            },
-            body: JSON.stringify(correo),
-        });
-        if (!response.ok) {
-            const errorDetails = await response.text(); 
-            throw new Error(`Error ${response.status}: ${errorDetails}`);
-        }
-        
-        const text = await response.text();
-
-        if (!text) {
-            return true;
-        }
-
-        try {
-            return JSON.parse(text);
-        } catch (e) {
-            return true;
-        }
-    }
-
-    async enviarCorreoRecuperacion(correo: CorreoRecuperacionContrasenaDTO, headers: Record<string, any>): Promise<boolean> {
-        const url = `${process.env.coreBaseUrl}/notificaciones/recuperacion`;
         const response = await fetch(url, {
             method: 'POST',
             headers: {
