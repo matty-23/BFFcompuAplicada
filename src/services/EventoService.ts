@@ -26,13 +26,9 @@ export class EventoService implements IEventoService {
     async getEventoById(id: string): Promise<EventoViewModel | null> {
         return await this.eventoClient.getById(id);
     }
-
-    async crearEventoMulti(dto: CrearEventoMultiDTO): Promise<EventoViewModel> {
-        console.log("EVENTO CREADO:", dto);
-        console.log("NOMBRE DEL EVENTO:", dto.titulo);
-        return await this.eventoClient.crearMulti(dto);
-    }
-
+async crearEventoMulti(dto: CrearEventoMultiDTO): Promise<EventoViewModel> {
+    return await this.eventoClient.crearMulti(dto);
+}
     async actualizarEvento(id: string, dto: ActualizarEventoDTO): Promise<void> {
         const payload: Record<string, unknown> = {};
 

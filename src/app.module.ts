@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EventoModule } from './modules/EventoModule';
 import { AuthModule } from './modules/AuthModule';
 import { SolicitudModule } from './modules/SolicitudModule';
+import { CorreoModule } from './modules/CorreoModule';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { SolicitudModule } from './modules/SolicitudModule';
     EventoModule,
     AuthModule,
     SolicitudModule,
+    CorreoModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
