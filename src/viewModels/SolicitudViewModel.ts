@@ -6,6 +6,11 @@ export class BloqueSolicitudViewModel {
         private readonly lugar: string
     ) {}
 
+    getId(): string { return this.id; }
+    getFechaInicio(): Date { return this.fechaInicio; }
+    getFechaFinalizacion(): Date { return this.fechaFinalizacion; }
+    getLugar(): string { return this.lugar; }
+
     toJSON(): object {
         return {
             id: this.id,
@@ -32,8 +37,16 @@ export class SolicitudViewModel {
     ) {}
 
     getId(): string { return this.id; }
+    getIdUsuarioSolicitante(): string { return this.idUsuarioSolicitante; }
     getEstado(): string { return this.estado; }
     getTipoEvento(): string { return this.tipoEvento; }
+    getNecesidadOperario(): boolean { return this.necesidadOperario; }
+    getAutorizacionRectoria(): boolean { return this.autorizacionRectoria; }
+    getBloques(): BloqueSolicitudViewModel[] { return this.bloques; }
+    getCantidadPersonas(): number | undefined { return this.cantidadPersonas; }
+    getPersonaEncargada(): string | undefined { return this.personaEncargada; }
+    getTiempoAnticipacion(): number | undefined { return this.tiempoAnticipacion; }
+    getCantidadOperariosDesignados(): number | undefined { return this.cantidadOperariosDesignados; }
 
     toJSON(): object {
         return {

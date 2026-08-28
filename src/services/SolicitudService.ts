@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import type { ISolicitudService } from '../interfaces/ISolicitudService';
 import type { ISolicitudClient } from '../interfaces/ISolicitudClient';
 import { SolicitudViewModel } from '../viewModels/SolicitudViewModel';
+import { CrearSolicitudDTO, ModificarSolicitudDTO, AceptarSolicitudDTO, RechazarSolicitudDTO, FiltrosSolicitudDTO } from '../DTO/SolicitudDTO';
 
 @Injectable()
 export class SolicitudService implements ISolicitudService {
@@ -11,23 +12,23 @@ export class SolicitudService implements ISolicitudService {
         @Inject('ISolicitudClient') private readonly solicitudClient: ISolicitudClient
     ) {}
 
-    async crear(idUsuario: string, dto: object): Promise<SolicitudViewModel> {
-        return await this.solicitudClient.crear(idUsuario, dto);
+    async crear(dto: CrearSolicitudDTO): Promise<SolicitudViewModel> {
+        return await this.solicitudClient.crear(dto);
     }
 
     async obtenerPorId(id: string): Promise<SolicitudViewModel | null> {
         return await this.solicitudClient.obtenerPorId(id);
     }
 
-    async listar(filtros: Record<string, string>, page?: number): Promise<SolicitudViewModel[]> {
+    async listar(filtros: FiltrosSolicitudDTO, page?: number): Promise<SolicitudViewModel[]> {
         return await this.solicitudClient.listar(filtros, page);
     }
 
-    async listarMias(idUsuario: string, page?: number): Promise<SolicitudViewModel[]> {
-        return await this.solicitudClient.listarPorUsuario(idUsuario, page);
+    async listarMias(page?: number): Promise<SolicitudViewModel[]> {
+        return await this.solicitudClient.listarPorUsuario(page);
     }
 
-    async modificar(id: string, dto: object): Promise<{ ok: boolean }> {
+    async modificar(id: string, dto: ModificarSolicitudDTO): Promise<{ ok: boolean }> {
         return await this.solicitudClient.modificar(id, dto);
     }
 
@@ -35,11 +36,11 @@ export class SolicitudService implements ISolicitudService {
         return await this.solicitudClient.cancelar(id);
     }
 
-    async aceptar(id: string, dto: object): Promise<{ ok: boolean }> {
+    async aceptar(id: string, dto: AceptarSolicitudDTO): Promise<{ ok: boolean }> {
         return await this.solicitudClient.aceptar(id, dto);
     }
 
-    async rechazar(id: string, dto?: object): Promise<{ ok: boolean }> {
+    async rechazar(id: string, dto?: RechazarSolicitudDTO): Promise<{ ok: boolean }> {
         return await this.solicitudClient.rechazar(id, dto);
     }
 }

@@ -1,12 +1,16 @@
 import { Module } from '@nestjs/common';
 import { SolicitudController } from '../controllers/SolicitudController';
 import { SolicitudService } from '../services/SolicitudService';
-// Eve: Importar SolicitudClient cuando lo crees inyectalo como 'ISolicitudClient'
+import { SolicitudClient } from '../client/SolicitudClient';
 
 @Module({
     controllers: [SolicitudController],
     providers: [
-        // Eve: Cuando SolicitudClient esté listo, agrégalo aquí:
+        SolicitudClient,
+        {
+            provide: 'ISolicitudClient',
+            useClass: SolicitudClient,
+        },
         {
             provide: 'ISolicitudService',
             useClass: SolicitudService,

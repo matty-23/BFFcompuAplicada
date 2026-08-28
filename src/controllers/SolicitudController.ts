@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Patch, Param, Body, Query, Inject, NotFoundException, HttpCode, HttpStatus } from '@nestjs/common';
 import type { ISolicitudService } from '../interfaces/ISolicitudService';
+import type { CrearSolicitudDTO, ModificarSolicitudDTO, AceptarSolicitudDTO, RechazarSolicitudDTO, FiltrosSolicitudDTO } from '../DTO/SolicitudDTO';
 
 @Controller('api/solicitudes')
 export class SolicitudController {
@@ -9,17 +10,15 @@ export class SolicitudController {
 
     // GET /api/solicitudes?estado=pendiente&page=1
     @Get()
-    async listar(@Query() filtros: Record<string, string>, @Query('page') page?: number) {
+    async listar(@Query() filtros: FiltrosSolicitudDTO, @Query('page') page?: number) {
         const solicitudes = await this.solicitudService.listar(filtros, page ? Number(page) : 1);
         return solicitudes.map(s => s.toJSON());
     }
 
     // GET /api/solicitudes/mis?page=1
-    // Eve: Cuando el SolicitudClient esté listo este endpoint va a leer el userId
-    // del header de sesión del AuthClient.
     @Get('mis')
-    async listarMias(@Query('idUsuario') idUsuario: string, @Query('page') page?: number) {
-        const solicitudes = await this.solicitudService.listarMias(idUsuario, page ? Number(page) : 1);
+    async listarMias(@Query('page') page?: number) {
+        const solicitudes = await this.solicitudService.listarMias(page ? Number(page) : 1);
         return solicitudes.map(s => s.toJSON());
     }
 
@@ -34,15 +33,14 @@ export class SolicitudController {
     // POST /api/solicitudes
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    async crear(@Query('idUsuario') idUsuario: string, @Body() dto: object) {
-        // TODO (Eve): idUsuario deberá venir del header de sesión (igual que en EventoController)
-        const solicitud = await this.solicitudService.crear(idUsuario, dto);
+    async crear(@Body() dto: CrearSolicitudDTO) {
+        const solicitud = await this.solicitudService.crear(dto);
         return solicitud.toJSON();
     }
 
     // PUT /api/solicitudes/:id
     @Put(':id')
-    async modificar(@Param('id') id: string, @Body() dto: object) {
+    async modificar(@Param('id') id: string, @Body() dto: ModificarSolicitudDTO) {
         return await this.solicitudService.modificar(id, dto);
     }
 
@@ -54,13 +52,13 @@ export class SolicitudController {
 
     // PATCH /api/solicitudes/:id/aceptar
     @Patch(':id/aceptar')
-    async aceptar(@Param('id') id: string, @Body() dto: object) {
+    async aceptar(@Param('id') id: string, @Body() dto: AceptarSolicitudDTO) {
         return await this.solicitudService.aceptar(id, dto);
     }
 
     // PATCH /api/solicitudes/:id/rechazar
     @Patch(':id/rechazar')
-    async rechazar(@Param('id') id: string, @Body() dto?: object) {
+    async rechazar(@Param('id') id: string, @Body() dto?: RechazarSolicitudDTO) {
         return await this.solicitudService.rechazar(id, dto);
     }
 }

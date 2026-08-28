@@ -1,12 +1,13 @@
 import { SolicitudViewModel } from '../viewModels/SolicitudViewModel';
+import { CrearSolicitudDTO, ModificarSolicitudDTO, AceptarSolicitudDTO, RechazarSolicitudDTO, FiltrosSolicitudDTO } from '../DTO/SolicitudDTO';
 
 export interface ISolicitudService {
-    crear(idUsuario: string, dto: object): Promise<SolicitudViewModel>;
+    crear(dto: CrearSolicitudDTO): Promise<SolicitudViewModel>;
     obtenerPorId(id: string): Promise<SolicitudViewModel | null>;
-    listar(filtros: Record<string, string>, page?: number): Promise<SolicitudViewModel[]>;
-    listarMias(idUsuario: string, page?: number): Promise<SolicitudViewModel[]>;
-    modificar(id: string, dto: object): Promise<{ ok: boolean }>;
+    listar(filtros: FiltrosSolicitudDTO, page?: number): Promise<SolicitudViewModel[]>;
+    listarMias(page?: number): Promise<SolicitudViewModel[]>;
+    modificar(id: string, dto: ModificarSolicitudDTO): Promise<{ ok: boolean }>;
     cancelar(id: string): Promise<{ ok: boolean }>;
-    aceptar(id: string, dto: object): Promise<{ ok: boolean }>;
-    rechazar(id: string, dto?: object): Promise<{ ok: boolean }>;
+    aceptar(id: string, dto: AceptarSolicitudDTO): Promise<{ ok: boolean }>;
+    rechazar(id: string, dto?: RechazarSolicitudDTO): Promise<{ ok: boolean }>;
 }
