@@ -16,9 +16,9 @@ export class CorreoDTO {
     @IsString()
     readonly asunto?: string;
 
-    @IsOptional()
+    @IsNotEmpty()
     @IsString()
-    readonly mensajeHtml?: string;
+    readonly mensajeHtml!: string;
 
     @IsOptional()
     @IsEnum(PrioridadCorreo)
@@ -39,24 +39,6 @@ export class ArchivoAdjuntoDTO {
     @IsString()
     @IsNotEmpty()
     readonly content!: string; 
-}
-
-export class CorreoRecuperacionContrasenaDTO {
-    @IsString()
-    @IsNotEmpty()
-    readonly destinatario!: string;
-
-    @IsNotEmpty()
-    @IsString()
-    readonly asunto!: string;
-
-    @IsNotEmpty()
-    @IsString()
-    readonly linkRecuperacion!: string;
-
-    @IsNotEmpty()
-    @IsString()
-    readonly mensaje!: string;
 }
 
 export class CorreoConfirmacionCuentaDTO {

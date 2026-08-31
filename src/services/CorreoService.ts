@@ -1,5 +1,5 @@
 import { Injectable,Inject } from "@nestjs/common";
-import { CorreoDTO,CorreoConfirmacionCuentaDTO,CorreoRecuperacionContrasenaDTO } from "../DTO/CorreoDTO";
+import { CorreoDTO,CorreoConfirmacionCuentaDTO,} from "../DTO/CorreoDTO";
 import { type ICorreoClient } from "../interfaces/ICorreoClient";
 import { ICorreoService } from "../interfaces/ICorreoService";
 
@@ -12,9 +12,6 @@ export class CorreoService implements ICorreoService{
     }
     async enviarCorreoConfirmacionCuenta(correo:CorreoConfirmacionCuentaDTO, headers: Record<string, any>):Promise<boolean>{
         return await this.correoClient.enviarCorreoCuenta(correo,headers);
-    }
-    async enviarCorreoRecuperacionContraseña(correo:CorreoRecuperacionContrasenaDTO, headers: Record<string, any>):Promise<boolean>{
-        return await this.correoClient.enviarCorreoRecuperacion(correo,headers);
     }
     async enviarCorreoConfirmacionSolicitudAEvento(correo:CorreoDTO, headers: Record<string, any>):Promise<boolean>{
         return this.correoClient.enviarCorreoConfirmacionSolicitud(correo,headers);

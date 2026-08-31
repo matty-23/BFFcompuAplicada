@@ -1,10 +1,11 @@
-import { LoginUsuarioDTO } from '../DTO/AuthUsuarioDTO';
+import { CorreoRecuperacionContrasenaDTO, LoginUsuarioDTO, RegistrarUsuarioDTO, RestablecerContrasenaDTO } from '../DTO/AuthUsuarioDTO';
 import { CoreResponse } from './CoreResponse';
-import { CrearUsuarioDTO } from '../DTO/UsuarioDTO';
 
 export interface IAuthService{
-    registrarUsuario(dto: CrearUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse>;
+    registrarUsuario(dto: RegistrarUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse>;
     iniciarSesion(bodyLogin: LoginUsuarioDTO,headers: Record<string, string>): Promise<CoreResponse>;
     validarSesion(headers: Record<string, string>): Promise<CoreResponse>;
-    cerrarSesion(headers: Record<string, string>);
+    cerrarSesion(headers: Record<string, string>): Promise<CoreResponse>;
+    solicitarRecuperacion(body: CorreoRecuperacionContrasenaDTO, headers: Record<string, string>): Promise<CoreResponse>
+    restablecerContrasena(body: RestablecerContrasenaDTO, headers: Record<string, string>): Promise<CoreResponse>;
 }
