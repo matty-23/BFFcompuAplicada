@@ -1,6 +1,6 @@
 import { Controller, Query, Get, Post, Put, Delete, Patch, Param, Body, Inject, NotFoundException, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
 import type { IEventoService } from '../interfaces/IEventoService';
-import { CrearEventoMultiDTO, ActualizarEventoDTO, AsignarEncargadoDTO, ParticipantesDTO } from '../DTO/EventoDTO';
+import { CrearEventoMultiDTO, ActualizarEventoDTO, AsignarEncargadoDTO, ActualizarOcurrenciaDTO } from '../DTO/EventoDTO';
 import { filtrosEventoDto } from '../DTO/FiltrosDto';
 @Controller('api/eventos')
 export class EventoController {
@@ -66,14 +66,17 @@ export class EventoController {
     }
 
     // PATCH /api/eventos/:id/encargado
-    @Patch(':idEvento/ocurrencias/:idOcurrencia/encargado')
-    async asignarEncargado(
-        @Param('idEvento') idEvento: string,
-        @Param('idOcurrencia') idOcurrencia: string,
-        @Body() dto: AsignarEncargadoDTO
-    ) {
-        const evento = await this.eventoService.asignarEncargado(idEvento, idOcurrencia, dto.usuarioId);
-        if (!evento) throw new NotFoundException(`Evento u ocurrencia no encontrados.`);
+    @Patch(':idEvento/ocurrencias/:idOcurrencia')
+    async actualizarOcurrencia(@Param('idEvento') idEvento: string, @Param('idOcurrencia') idOcurrencia: string, @Body() dto: ActualizarOcurrenciaDTO) {
+        const evento = await this.eventoService.actualizarOcurrencia(
+            idEvento,
+            idOcurrencia,
+            dto
+        );
+
+        if (!evento) {
+            throw new NotFoundException(`Evento u ocurrencia no encontrados.`);
+        }
         return evento.toJSON();
     }
 

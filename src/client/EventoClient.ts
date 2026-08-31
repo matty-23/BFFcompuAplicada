@@ -5,7 +5,7 @@ import { IEventoClient } from '../interfaces/IEventoClient';
 import { EventoViewModel } from '../viewModels/EventoViewModel';
 import { UsuarioViewModel } from '../viewModels/UsuarioViewModel';
 import { OcurrenciaViewModel } from '../viewModels/OcurreciaViewModel';
-
+import { ActualizarOcurrenciaDTO } from '../DTO/EventoDTO';
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3000';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -18,28 +18,53 @@ export class EventoClient implements IEventoClient {
 
     // En EventoClient.ts (Frontend/BFF)
     private mapearEvento(raw: any): EventoViewModel {
-        // Verifica en la consola (Network Tab) qué objeto JSON llega realmente del servidor
 
         const ocurrencias = (raw.ocurrencias || []).map((oc: any) => {
+
             const encargado = oc.encargado
-                ? new UsuarioViewModel(oc.encargado.id, oc.encargado.nombre, oc.encargado.apellido, oc.encargado.correo, oc.encargado.departamento ?? '', oc.encargado.rol ?? '')
+                ? new UsuarioViewModel(
+                    oc.encargado.id,
+                    oc.encargado.nombre,
+                    oc.encargado.apellido,
+                    oc.encargado.correo,
+                    oc.encargado.departamento ?? '',
+                    oc.encargado.rol ?? ''
+                )
                 : undefined;
 
-            const participantes: UsuarioViewModel[] = (oc.participantes ?? []).map(
-                (p: any) => new UsuarioViewModel(p.id, p.nombre, p.apellido, p.correo, p.departamento ?? '', p.rol ?? '')
-            );
+            const participantes: UsuarioViewModel[] =
+                (oc.participantes ?? []).map(
+                    (p: any) =>
+                        new UsuarioViewModel(
+                            p.id,
+                            p.nombre,
+                            p.apellido,
+                            p.correo,
+                            p.departamento ?? '',
+                            p.rol ?? ''
+                        )
+                );
 
             return new OcurrenciaViewModel(
-                oc.id, oc.idEvento, new Date(oc.fechaInicio), new Date(oc.fechaFinalizacion),
-                oc.lugar, oc.cantidadPersonas, participantes, encargado
+                oc.id,
+                oc.idEvento,
+                new Date(oc.fechaInicio),
+                new Date(oc.fechaFinalizacion),
+                oc.tipo ?? 'normal',
+                oc.lugar,
+                oc.cantidadPersonas ?? 0,
+                participantes,
+                encargado
             );
         });
-        // espera `id, nombre, estado, categoria`.
+
         return new EventoViewModel(
             raw.id,
-            raw.titulo || raw.nombre,
+            raw.titulo ?? raw.nombre ?? '',
             raw.estado ?? '',
             raw.categoria ?? '',
+            raw.color ?? '#B2FFFF',
+            raw.recurrencia ?? undefined,
             ocurrencias
         );
     }
@@ -174,18 +199,23 @@ export class EventoClient implements IEventoClient {
         }
     }
 
-    async asignarEncargado(idEvento: string, idOcurrencia: string, usuarioId: string): Promise<EventoViewModel> {
+    async actualizarOcurrencia(idEvento: string, idOcurrencia: string, dto: ActualizarOcurrenciaDTO): Promise<EventoViewModel> {
         try {
-            const res = await fetch(`${this.baseUrl}/${idEvento}/ocurrencias/${idOcurrencia}/encargado`, {
-                method: 'PATCH',
-                headers: this.getHeaders(true),
-                body: JSON.stringify({ usuarioId }),
-            });
-            if (!res.ok) throw { status: res.status, message: await res.text() };
-            return this.mapearEvento(await res.json());
-        } catch (e) { this.handleError(e, 'asignarEncargado'); }
-    }
+            const res = await fetch(`${this.baseUrl}/${idEvento}/ocurrencias/${idOcurrencia}`,
+                {
+                    method: 'PATCH',
+                    headers: this.getHeaders(true),
+                    body: JSON.stringify(dto),
+                }
+            );
+            if (!res.ok) {
+                throw { status: res.status, message: await res.text() };
+            }
 
+            return this.mapearEvento(await res.json());
+
+        } catch (e) { this.handleError(e, 'actualizarOcurrencia'); }
+    }
     async agregarParticipantes(idOcurrencia: string, participantes: string[]): Promise<void> {
         try {
             const res = await fetch(`${this.baseUrl}/ocurrencias/${idOcurrencia}/AParticipantes`, {
