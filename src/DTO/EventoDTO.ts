@@ -1,91 +1,85 @@
 import { IsString, IsNumber, IsNotEmpty, IsArray, ValidateNested, IsInt, IsOptional, ArrayMinSize, IsDateString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class OcurrenciaDTO {
-    @IsString()
-    @IsNotEmpty()
-    lugar!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    fechaInicio!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    fechaFinalizacion!: string;
-
-    @IsNumber()
-    cantidadPersonas!: number;
-
-    @IsString()
-    @IsOptional()
-    encargadoId?: string;
-    
-    @IsString()
-    @IsOptional()
-    participantes?: string[];
-}
-
-
-export class CrearEventoMultiDTO {
-    @IsString()
-    @IsNotEmpty()
-    readonly titulo!: string;
-
-    @IsString()
-    @IsOptional()
-    readonly categoria?: string;
-
-    @IsArray()
-    @ArrayMinSize(2)
-    @ValidateNested({ each: true })
-    @Type(() => OcurrenciaDTO)
-    readonly ocurrencias!: OcurrenciaDTO[];
+export class OcurrenciaDto {
+    @IsDateString() @IsNotEmpty()
+    readonly fechaInicio!: string;
+    @IsDateString() @IsNotEmpty()
+    readonly fechaFinalizacion!: string;
+    @IsString() @IsOptional() 
+    readonly tipo?: string; 
+    @IsString() @IsNotEmpty()
+    readonly lugar!: string;
+    @IsNumber() @Min(1)
+    readonly cantidadPersonas!: number;
+    @IsString() @IsOptional()
+    readonly id_encargado?: string;
+    @IsArray() @IsString({ each: true }) @IsOptional()
+    readonly participantes?: string[];
+    @IsString() @IsOptional()
+    readonly idApiGoogle?: boolean;
 }
 
 export class ActualizarOcurrenciaDTO {
-    @IsString()
-    @IsNotEmpty()
+    @IsString() @IsNotEmpty()
     readonly id!: string;
-
-    @IsString()
-    @IsOptional()
+    @IsString() @IsOptional()
     readonly lugar?: string;
-
-    @IsString()
-    @IsOptional()
+    @IsString() @IsOptional()
     readonly fechaInicio?: string;
-
-    @IsString()
-    @IsOptional()
+    @IsString() @IsOptional()
     readonly fechaFinalizacion?: string;
-
-    @IsNumber()
-    @IsOptional()
+    @IsString() @IsOptional() 
+    readonly tipo?: string; 
+    @IsNumber() @IsOptional()
     readonly cantidadPersonas?: number;
+    @IsString() @IsOptional()
+    readonly id_encargado?: string;
+    @IsArray() @IsString({ each: true }) @IsOptional()
+    readonly participantes?: string[];
+    @IsString() @IsOptional()
+    readonly idApiGoogle?: boolean;
+    @IsString() @IsOptional()
+    readonly fueActualizado?: boolean;
 }
 
-// Y modifica tu clase ActualizarEventoDTO existente así:
-export class ActualizarEventoDTO {
-    @IsString()
-    @IsOptional()
-    readonly titulo?: string;
-
-    @IsString()
-    @IsOptional()
+export class CrearEventoMultiDTO {
+    @IsString() @IsNotEmpty()
+    readonly titulo!: string;
+    @IsString() @IsOptional()
     readonly categoria?: string;
-
-    @IsString()
-    @IsOptional()
-    readonly estado?: string;
-
-    // 👈 NUEVO CAMPO AÑADIDO
-    @IsArray()
+    @IsArray() @ArrayMinSize(1)
     @ValidateNested({ each: true })
-    @Type(() => ActualizarOcurrenciaDTO)
-    @IsOptional()
+    @Type(() => OcurrenciaDto)
+    readonly ocurrencias!: OcurrenciaDto[];
+    @IsString() @IsOptional()
+    readonly color?: string;
+    @IsString() @IsOptional()
+    readonly recurrencia?: string;
+}
+
+export class EncargadoDto {
+    @IsString() @IsNotEmpty()
+    readonly usuarioId!: string;
+}
+
+export class ActualizarEventoDTO {
+    @IsString() @IsOptional()
+    readonly titulo?: string;
+    @IsString() @IsOptional()
+    readonly categoria?: string;
+    @IsString() @IsOptional()
+    readonly estado?: string;
+    @IsString() @IsOptional()
+    readonly color?: string;
+    @IsString() @IsOptional()
+    readonly tipo?: string;
+    @IsString() @IsOptional()
+    readonly recurrencia?: string;
+    @IsArray() @ValidateNested({ each: true }) @Type(() => ActualizarOcurrenciaDTO) @IsOptional()
     readonly ocurrencias?: ActualizarOcurrenciaDTO[];
 }
+
 
 export class AsignarEncargadoDTO {
     @IsString()

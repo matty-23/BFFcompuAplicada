@@ -6,6 +6,8 @@ export class EventoViewModel {
         private readonly titulo: string,
         private readonly estado: string,
         private readonly categoria: string,
+        private readonly color: string = "#B2FFFF",
+        private readonly recurrencia?: string,
         private readonly ocurrencias: OcurrenciaViewModel[] = []
     ) {}
 
@@ -25,12 +27,26 @@ export class EventoViewModel {
         return this.categoria;
     }
 
+    getColor(): string {
+        return this.color;
+    }
+
+    getRecurrencia(): string | undefined {
+        return this.recurrencia;
+    }
+
+    getOcurrencias(): OcurrenciaViewModel[] {
+        return this.ocurrencias;
+    }
+
     toJSON(): object {
         return {
             id: this.id,
             titulo: this.titulo,
             estado: this.estado,
             categoria: this.categoria,
+            color: this.color,
+            recurrencia: this.recurrencia,
             ocurrencias: this.ocurrencias.map(o => o.toJSON()),
         };
     }

@@ -1,5 +1,5 @@
 import { EventoViewModel } from '../viewModels/EventoViewModel';
-import { CrearEventoMultiDTO, ActualizarEventoDTO } from '../DTO/EventoDTO';
+import { CrearEventoMultiDTO, ActualizarEventoDTO, ActualizarOcurrenciaDTO } from '../DTO/EventoDTO';
 import { filtrosEventoDto } from '../DTO/FiltrosDto';
 
 export interface IEventoService {
@@ -8,7 +8,7 @@ export interface IEventoService {
     crearEventoMulti(dto: CrearEventoMultiDTO): Promise<EventoViewModel>;
     actualizarEvento(id: string, dto: ActualizarEventoDTO): Promise<void>;
     eliminarEvento(id: string[]): Promise<void>;
-    asignarEncargado(idEvento: string, idOcurrencia: string, usuarioId: string): Promise<EventoViewModel>;
+    actualizarOcurrencia(idEvento: string,idOcurrencia: string, dto: ActualizarOcurrenciaDTO): Promise<EventoViewModel>;
     agregarParticipantes(idOcurrencia: string, participantes: string[]): Promise<void>;
     borrarParticipante(idOcurrencia: string, usuarioId: string): Promise<EventoViewModel>;
     filtrado(filtros: filtrosEventoDto): Promise<EventoViewModel[]>;
