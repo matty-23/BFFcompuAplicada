@@ -1,5 +1,5 @@
 import { ICorreoClient } from "../interfaces/ICorreoClient"
-import { CorreoDTO, CorreoConfirmacionCuentaDTO, CorreoRecuperacionContrasenaDTO } from "../DTO/CorreoDTO"
+import { CorreoDTO, CorreoConfirmacionCuentaDTO} from "../DTO/CorreoDTO"
 
 export class CorreoClient implements ICorreoClient {
 
@@ -14,12 +14,23 @@ export class CorreoClient implements ICorreoClient {
             },
             body: JSON.stringify(correo),
         });
+        
         if (!response.ok) {
-            throw new Error(`Error ${response.status}`);
+            const errorDetails = await response.text(); 
+            throw new Error(`Error ${response.status}: ${errorDetails}`);
+        }
+        
+        const text = await response.text();
+
+        if (!text) {
+            return true;
         }
 
-        const resultado: boolean = await response.json();
-        return resultado;
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            return true;
+        }
     }
 
     async enviarCorreoCuenta(correo: CorreoConfirmacionCuentaDTO, headers: Record<string, any>): Promise<boolean> {
@@ -34,30 +45,21 @@ export class CorreoClient implements ICorreoClient {
             body: JSON.stringify(correo),
         });
         if (!response.ok) {
-            throw new Error(`Error ${response.status}`);
+            const errorDetails = await response.text(); 
+            throw new Error(`Error ${response.status}: ${errorDetails}`);
+        }
+        
+        const text = await response.text();
+
+        if (!text) {
+            return true;
         }
 
-        const resultado: boolean = await response.json();
-        return resultado;
-    }
-
-    async enviarCorreoRecuperacion(correo: CorreoRecuperacionContrasenaDTO, headers: Record<string, any>): Promise<boolean> {
-        const url = `${process.env.coreBaseUrl}/notificaciones/recuperacion`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(headers.origin && { 'Origin': headers.origin }),
-                ...(headers.cookie && { 'Cookie': headers.cookie }),
-            },
-            body: JSON.stringify(correo),
-        });
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}`);
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            return true;
         }
-
-        const resultado: boolean = await response.json();
-        return resultado;
     }
 
     async enviarCorreoConfirmacionSolicitud(correo: CorreoDTO, headers: Record<string, any>): Promise<boolean> {
@@ -72,10 +74,20 @@ export class CorreoClient implements ICorreoClient {
             body: JSON.stringify(correo),
         });
         if (!response.ok) {
-            throw new Error(`Error ${response.status}`);
+            const errorDetails = await response.text(); 
+            throw new Error(`Error ${response.status}: ${errorDetails}`);
+        }
+        
+        const text = await response.text();
+
+        if (!text) {
+            return true;
         }
 
-        const resultado: boolean = await response.json();
-        return resultado;
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            return true;
+        }
     }
 }

@@ -54,3 +54,25 @@ export class CambiarContraseñaDTO{
     @IsOptional()
     readonly revokeOtherSessions?: boolean;
 }
+
+export class CorreoRecuperacionContrasenaDTO {
+    
+    @IsString()
+    @IsNotEmpty()
+    readonly email!: string;
+
+    @IsString()
+    @IsNotEmpty()
+    readonly redirectTo!: string; 
+
+}
+
+export class RestablecerContrasenaDTO {
+    @IsString()
+    @IsNotEmpty()
+    readonly newPassword!: string;
+
+    @IsString()
+    @IsNotEmpty()
+    readonly token!: string;
+}

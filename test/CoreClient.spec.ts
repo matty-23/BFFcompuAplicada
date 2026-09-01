@@ -1,7 +1,7 @@
-import { CoreClient } from '../src/client/AuthClient';
+import { AuthClient } from '../src/client/AuthClient';
 
 
-describe('CoreClient login', () => {
+describe('AuthClient login', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -20,8 +20,8 @@ describe('CoreClient login', () => {
 
     global.fetch = jest.fn().mockResolvedValue(response);
 
-    const client = new CoreClient();
-    const result = await client.iniciarSesion({ email: 'test@test.com', password: '123456' }, {});
+    const client = new AuthClient();
+    const result = await client.iniciarSesion({ name: 'test', email: 'test@test.com', password: '123456' }, {});
 
     expect(result.status).toBe(200);
     expect(result.cookies).toEqual(['session=abc; Path=/; HttpOnly']);

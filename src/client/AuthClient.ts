@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CoreResponse } from '../interfaces/CoreResponse';
-import { RegistrarUsuarioDTO, LoginUsuarioDTO } from "../DTO/AuthUsuarioDTO"
+import { RegistrarUsuarioDTO, LoginUsuarioDTO,CorreoRecuperacionContrasenaDTO,RestablecerContrasenaDTO } from "../DTO/AuthUsuarioDTO"
 import { IAuthClient } from '../interfaces/IAuthClient';
 
 @Injectable()
@@ -22,6 +22,7 @@ export class AuthClient implements IAuthClient {
   //Esto puede quedar igual al IniciarSesion con el tema cookies
   async registrarUsuario(body: RegistrarUsuarioDTO, headers: Record<string, any>): Promise<CoreResponse> {
     const url = `${process.env.coreBaseUrl}/api/auth/sign-up/email`;
+    console.log(headers.origin);
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -121,6 +122,49 @@ export class AuthClient implements IAuthClient {
 
     const data = await response.json().catch(() => null);
 
+    return {
+      status: response.status,
+      data,
+      cookies: this.extraerCookies(response),
+    };
+  }
+
+  async solicitarRecuperacion(body: CorreoRecuperacionContrasenaDTO, headers: Record<string, any>): Promise<CoreResponse> {
+    const url = `${process.env.coreBaseUrl}/api/auth/forget-password`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(headers.origin && { 'Origin': headers.origin }),
+      },
+      body: JSON.stringify(body),
+    });
+    
+    const data = await response.json().catch(() => null);
+    return {
+      status: response.status,
+      data,
+      cookies: this.extraerCookies(response),
+    };
+  }
+
+  async restablecerContrasena(body: RestablecerContrasenaDTO, headers: Record<string, any>): Promise<CoreResponse> {
+    const url = `${process.env.coreBaseUrl}/api/auth/reset-password`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(headers.origin && { 'Origin': headers.origin }),
+      },
+      body: JSON.stringify({
+        newPassword: body.newPassword,
+        token: body.token
+      }),
+    });
+    
+    const data = await response.json().catch(() => null);
     return {
       status: response.status,
       data,
