@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { beforeEach, describe, it, expect, jest, afterEach } from '@jest/globals';
 import { CorreoClient } from '../../../src/client/CorreoClient';
 import { headersMock } from '../../models/core.response';
@@ -12,9 +13,12 @@ describe('CorreoClient', () => {
         cookie: headersMock.Cookie,
     };
 
+    // Mock super completo de Fetch Response incluyendo .text() y .ok
     const createFetchResponse = (status: number, data: any): Response => ({
         status,
+        ok: status >= 200 && status < 300,
         json: jest.fn<() => Promise<any>>().mockResolvedValue(data),
+        text: jest.fn<() => Promise<string>>().mockResolvedValue(typeof data === 'string' ? data : JSON.stringify(data)),
     } as unknown as Response);
 
     beforeEach(() => {
@@ -28,53 +32,53 @@ describe('CorreoClient', () => {
     });
 
     describe('enviarNotificacion', () => {
-        it('Debería hacer POST a /api/correo/notificacion y devolver true', async () => {
-            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { sent: true }));
+       it('Debería hacer POST a /notificaciones y devolver true', async () => {
+    jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { sent: true }));
 
-            const result = await correoClient.enviarNotificacion(correoDtoMock, clientHeadersMock);
+    const result = await correoClient.enviarNotificacion(correoDtoMock, clientHeadersMock);
 
-            expect(global.fetch).toHaveBeenCalledWith(
-                `${mockBaseUrl}/api/correo/notificacion`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': clientHeadersMock.origin,
-                        'Cookie': clientHeadersMock.cookie,
-                    },
-                    body: JSON.stringify(correoDtoMock),
-                }
-            );
-            expect(result).toBe(true);
-        });
+    expect(global.fetch).toHaveBeenCalledWith(
+        `${mockBaseUrl}/notificaciones`, // <-- URL corregida
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Origin': clientHeadersMock.origin,
+                'Cookie': clientHeadersMock.cookie,
+            },
+            body: JSON.stringify(correoDtoMock),
+        }
+    );
+    expect(result).toEqual({ sent: true });
+});
 
-        it('Debería devolver false si el status no es 200', async () => {
-            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(400, { error: 'Bad Request' }));
+        it('Debería lanzar un error si el status no es 200', async () => {
+    jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(400, 'Bad Request'));
 
-            const result = await correoClient.enviarNotificacion(correoDtoMock, clientHeadersMock);
-            expect(result).toBe(false);
-        });
+    await expect(correoClient.enviarNotificacion(correoDtoMock, clientHeadersMock))
+        .rejects.toThrow('Error 400: Bad Request'); // <-- Sin comillas
+});
     });
 
     describe('enviarCorreoCuenta', () => {
-        it('Debería hacer POST a /api/correo/cuenta y devolver true', async () => {
-            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { sent: true }));
+        it('Debería hacer POST a /notificaciones/cuenta/confirmacion y devolver true', async () => {
+    jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { sent: true }));
 
-            const result = await correoClient.enviarCorreoCuenta(correoConfirmacionCuentaDtoMock, clientHeadersMock);
+    const result = await correoClient.enviarCorreoCuenta(correoConfirmacionCuentaDtoMock, clientHeadersMock);
 
-            expect(global.fetch).toHaveBeenCalledWith(
-                `${mockBaseUrl}/api/correo/cuenta`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': clientHeadersMock.origin,
-                        'Cookie': clientHeadersMock.cookie,
-                    },
-                    body: JSON.stringify(correoConfirmacionCuentaDtoMock),
-                }
-            );
-            expect(result).toBe(true);
-        });
+    expect(global.fetch).toHaveBeenCalledWith(
+        `${mockBaseUrl}/notificaciones/cuenta/confirmacion`, // <-- URL corregida
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Origin': clientHeadersMock.origin,
+                'Cookie': clientHeadersMock.cookie,
+            },
+            body: JSON.stringify(correoConfirmacionCuentaDtoMock),
+        }
+    );
+    expect(result).toEqual({ sent: true });
+});
     });
 });

@@ -6,11 +6,10 @@ import { EventoViewModel } from '../viewModels/EventoViewModel';
 import { UsuarioViewModel } from '../viewModels/UsuarioViewModel';
 import { OcurrenciaViewModel } from '../viewModels/OcurreciaViewModel';
 import { ActualizarOcurrenciaDTO } from '../DTO/EventoDTO';
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3000';
 
 @Injectable({ scope: Scope.REQUEST })
 export class EventoClient implements IEventoClient {
-    private readonly baseUrl = `${BACKEND_URL}/api/Eventos`;
+    private readonly baseUrl = `${process.env.coreBaseUrl}/api/Eventos`;
 
     // Inyectamos el objeto Request de Express
     constructor(@Inject(REQUEST) private readonly request: Request) { }

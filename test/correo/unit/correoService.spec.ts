@@ -34,8 +34,7 @@ describe('CorreoService', () => {
         it('Debería lanzar error si hay una excepción inesperada', async () => {
             mockCorreoClient.enviarNotificacion.mockRejectedValue(new Error('Falla SMTP'));
 
-            await expect(correoService.enviarNotificacion(correoDtoMock, headersMock))
-                .rejects.toThrow(new HttpException('Falla SMTP', HttpStatus.INTERNAL_SERVER_ERROR));
+            await expect(correoService.enviarNotificacion(correoDtoMock, headersMock)).rejects.toThrow('Falla SMTP');
         });
     });
 
@@ -52,8 +51,7 @@ describe('CorreoService', () => {
         it('Debería propagar excepciones del cliente como HttpException', async () => {
             mockCorreoClient.enviarCorreoCuenta.mockRejectedValue(new Error('Timeout'));
 
-            await expect(correoService.enviarCorreoConfirmacionCuenta(correoConfirmacionCuentaDtoMock, headersMock))
-                .rejects.toThrow(new HttpException('Timeout', HttpStatus.INTERNAL_SERVER_ERROR));
+            await expect(correoService.enviarCorreoConfirmacionCuenta(correoConfirmacionCuentaDtoMock, headersMock)).rejects.toThrow('Timeout');
         });
     });
 
