@@ -20,7 +20,7 @@ describe('UsuarioService', () => {
             mockUsuarioClient.obtenerUsuario.mockResolvedValue(CoreResponseOk(usuarioModelo));
 
             const result = await usuarioService.obtenerUsuario(headersMock, '1');
-
+            
             expect(result.data).toEqual(usuarioModelo);
             expect(result.status).toEqual(200);
             expect(result.cookies).toEqual([]);
@@ -38,9 +38,9 @@ describe('UsuarioService', () => {
 
         it('Debería retornar error manejado por el backend (Ej. 400)', async () => {
             mockUsuarioClient.obtenerUsuario.mockResolvedValue(CoreResponseBad());
-
+            
             const result = await usuarioService.obtenerUsuario(headersMock, '1');
-
+            
             expect(result).toEqual(CoreResponseBad());
             expect(result.status).toEqual(400);
             expect(result.cookies).toEqual([]);
@@ -53,7 +53,7 @@ describe('UsuarioService', () => {
             mockUsuarioClient.actualizarUsuario.mockResolvedValue(CoreResponseOk(usuarioModeloActualizado));
 
             const result = await usuarioService.actualizarUsuario(usuarioModeloActualizado, headersMock);
-
+            
             expect(result.data).toEqual(usuarioModeloActualizado);
             expect(result.status).toEqual(200);
             expect(result.cookies).toEqual([]);
@@ -71,9 +71,9 @@ describe('UsuarioService', () => {
 
         it('Debería retornar error manejado por el backend (Ej. 400)', async () => {
             mockUsuarioClient.actualizarUsuario.mockResolvedValue(CoreResponseBad());
-
+            
             const result = await usuarioService.actualizarUsuario(usuarioModeloActualizado, headersMock);
-
+            
             expect(result).toEqual(CoreResponseBad());
             expect(result.status).toEqual(400);
             expect(mockUsuarioClient.actualizarUsuario).toHaveBeenCalledWith(usuarioModeloActualizado, headersMock);
@@ -83,28 +83,26 @@ describe('UsuarioService', () => {
     describe('obtenerUsuarios', () => {
         it('Debería listar usuarios exitosamente', async () => {
             const listaUsuarios = [usuarioModelo, usuarioModeloActualizado];
-            // Fix: usar mockUsuarioClient.obtenerUsuarios o el método de la interfaz que corresponda.
-            // Según IUsuarioService, el método es listarUsuarios en Client o el equivalente. 
-            // Asumimos listarUsuarios por la implementación previa.
             mockUsuarioClient.listarUsuarios.mockResolvedValue(CoreResponseOk(listaUsuarios));
 
             const result = await usuarioService.obtenerUsuarios(headersMock);
-
+            
             expect(result.data).toEqual(listaUsuarios);
             expect(result.status).toEqual(200);
-            expect(mockUsuarioClient.listarUsuarios).toHaveBeenCalledWith(headersMock); // O el mapeo que haga el Service
+            expect(mockUsuarioClient.listarUsuarios).toHaveBeenCalledWith(headersMock);
         });
 
         it('Debería lanzar error si falla inesperadamente', async () => {
             mockUsuarioClient.listarUsuarios.mockRejectedValue(new Error('Falla de red'));
-
+            
             await expect(usuarioService.obtenerUsuarios(headersMock)).rejects.toThrow('Falla de red');
         });
+
         it('Debería retornar error manejado por el backend (Ej. 400) al obtener usuarios', async () => {
             mockUsuarioClient.listarUsuarios.mockResolvedValue(CoreResponseBad());
 
             const result = await usuarioService.obtenerUsuarios(headersMock);
-
+            
             expect(result).toEqual(CoreResponseBad());
             expect(result.status).toEqual(400);
             expect(mockUsuarioClient.listarUsuarios).toHaveBeenCalledWith(headersMock);
@@ -113,11 +111,12 @@ describe('UsuarioService', () => {
 
     describe('listarUsuarios (con filtros)', () => {
         const filtrosMock: GetUsuariosQueryDTO = { orden: 'asc', ordenar: 'nombre', limit: 10, skip: 0 };
+        
         it('Debería listar usuarios con filtros aplicados exitosamente', async () => {
             mockUsuarioClient.listarUsuarios.mockResolvedValue(CoreResponseOk([usuarioModelo]));
 
             const result = await usuarioService.listarUsuarios(headersMock, filtrosMock);
-
+            
             expect(result.status).toEqual(200);
             expect(result.data).toEqual([usuarioModelo]);
         });
@@ -126,9 +125,10 @@ describe('UsuarioService', () => {
             mockUsuarioClient.listarUsuarios.mockResolvedValue(CoreResponseBad());
 
             const result = await usuarioService.listarUsuarios(headersMock, filtrosMock);
-
+            
             expect(result.status).toEqual(400);
         });
+
         it('Debería lanzar error si el BFF falla con una excepción inesperada al listar con filtros', async () => {
             mockUsuarioClient.listarUsuarios.mockRejectedValue(new Error('Error de conexión con BFF'));
 
@@ -148,7 +148,7 @@ describe('UsuarioService', () => {
             mockUsuarioClient.actualizarContraseña.mockResolvedValue(CoreResponseOk({ success: true }));
 
             const result = await usuarioService.actualizarContraseña(cambioContraseñaPayload, headersMock);
-
+            
             expect(result.status).toEqual(200);
             expect(result.data).toEqual({ success: true });
             expect(mockUsuarioClient.actualizarContraseña).toHaveBeenCalledWith(cambioContraseñaPayload, headersMock);
@@ -161,11 +161,12 @@ describe('UsuarioService', () => {
             await expect(usuarioService.actualizarContraseña(cambioContraseñaPayload, headersMock))
                 .rejects.toThrow(errorAuth);
         });
+
         it('Debería retornar error manejado por el backend (Ej. 400 Contraseña incorrecta)', async () => {
             mockUsuarioClient.actualizarContraseña.mockResolvedValue(CoreResponseBad());
 
             const result = await usuarioService.actualizarContraseña(cambioContraseñaPayload, headersMock);
-
+            
             expect(result).toEqual(CoreResponseBad());
             expect(result.status).toEqual(400);
             expect(mockUsuarioClient.actualizarContraseña).toHaveBeenCalledWith(cambioContraseñaPayload, headersMock);
@@ -177,7 +178,7 @@ describe('UsuarioService', () => {
             mockUsuarioClient.eliminarUsuario.mockResolvedValue(CoreResponseOk({ deleted: true }));
 
             const result = await usuarioService.eliminarUsuario(headersMock, '1');
-
+            
             expect(result.status).toEqual(200);
             expect(mockUsuarioClient.eliminarUsuario).toHaveBeenCalledWith(headersMock, '1');
         });
@@ -186,15 +187,17 @@ describe('UsuarioService', () => {
             mockUsuarioClient.eliminarUsuario.mockResolvedValue({ status: 404, data: null, cookies: [] });
 
             const result = await usuarioService.eliminarUsuario(headersMock, '1');
-
+            
             expect(result.status).toEqual(404);
             expect(mockUsuarioClient.eliminarUsuario).toHaveBeenCalledWith(headersMock, '1');
         });
+
         it('Debería lanzar error si falla inesperadamente al intentar eliminar', async () => {
             const errorInesperado = new Error('Timeout al eliminar');
             mockUsuarioClient.eliminarUsuario.mockRejectedValue(errorInesperado);
 
-            await expect(usuarioService.eliminarUsuario(headersMock, '1')).rejects.toThrow(errorInesperado);
+            await expect(usuarioService.eliminarUsuario(headersMock, '1')).rejects.toThrow(HttpException);
+            
             expect(mockUsuarioClient.eliminarUsuario).toHaveBeenCalledWith(headersMock, '1');
         });
     });

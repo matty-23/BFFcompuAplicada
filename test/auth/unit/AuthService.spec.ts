@@ -1,9 +1,9 @@
 import { beforeEach, describe, it, expect, jest } from '@jest/globals';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { AuthService } from '../../../src/services/AuthService';
-import { mockAuthClient} from '../mocks/authService.mock';
-import { registrarUsuarioDtoMock, loginUsuarioDtoMock, correoRecuperacionDtoMock, restablecerContrasenaDtoMock } from '../../models/auth.modelo';
-import { CoreResponseBad, CoreResponseOk, headersMock } from '../../models/core.response'; //[cite: 3]
+import {registrarUsuarioDtoMock, loginUsuarioDtoMock, correoRecuperacionDtoMock, restablecerContrasenaDtoMock } from '../../models/auth.modelo';
+import { mockAuthClient } from '../mocks/authService.mock';
+import { CoreResponseBad, CoreResponseOk, headersMock } from '../../models/core.response';
 
 describe('AuthService', () => {
     let authService: AuthService;
@@ -14,13 +14,27 @@ describe('AuthService', () => {
     });
 
     describe('registrarUsuario', () => {
-        it('Debería registrar un usuario exitosamente (200)', async () => {
-            mockAuthClient.registrarUsuario.mockResolvedValue(CoreResponseOk({ id: '1', ...registrarUsuarioDtoMock }));
+        it('Debería registrar un usuario exitosamente (201)', async () => {
+            mockAuthClient.registrarUsuario.mockResolvedValue({ status: 201, data: { id: '1' }, cookies: [] });
 
-            const result = await authService.registrarUsuario(registrarUsuarioDtoMock, headersMock); //[cite: 1]
+            const result = await authService.registrarUsuario(registrarUsuarioDtoMock, headersMock);
             
-            expect(result.status).toEqual(200);
-            expect(result.data.id).toEqual('1');
+            expect(result.status).toEqual(201);
+            
+            expect(result.data).toEqual({
+                auth: { 
+                    id: '1' 
+                },
+                usuario: {
+                    id: '1',
+                    nombre: registrarUsuarioDtoMock.name,
+                    apellido: registrarUsuarioDtoMock.apellido,
+                    correo: registrarUsuarioDtoMock.email,
+                    departamento: registrarUsuarioDtoMock.departamento,
+                    rol: undefined
+                }
+            });
+            
             expect(mockAuthClient.registrarUsuario).toHaveBeenCalledWith(registrarUsuarioDtoMock, headersMock);
         });
 
@@ -34,11 +48,10 @@ describe('AuthService', () => {
         });
 
         it('Debería lanzar error si el BFF falla con una excepción inesperada', async () => {
-            const errorInesperado = new Error('Error de red');
-            mockAuthClient.registrarUsuario.mockRejectedValue(errorInesperado);
+            mockAuthClient.registrarUsuario.mockRejectedValue(new Error('Error de red'));
 
             await expect(authService.registrarUsuario(registrarUsuarioDtoMock, headersMock))
-                .rejects.toThrow('Error de red');
+                .rejects.toThrow(new HttpException('El servidor principal no responde', HttpStatus.INTERNAL_SERVER_ERROR));
         });
     });
 
@@ -47,7 +60,7 @@ describe('AuthService', () => {
             const cookiesSision = ['sessionId=12345; HttpOnly'];
             mockAuthClient.iniciarSesion.mockResolvedValue(CoreResponseOk({ token: 'abc' }, cookiesSision));
 
-            const result = await authService.iniciarSesion(loginUsuarioDtoMock, headersMock); //[cite: 1]
+            const result = await authService.iniciarSesion(loginUsuarioDtoMock, headersMock);
             
             expect(result.status).toEqual(200);
             expect(result.cookies).toEqual(cookiesSision);
@@ -64,10 +77,11 @@ describe('AuthService', () => {
         });
 
         it('Debería lanzar error por excepción inesperada', async () => {
-            mockAuthClient.iniciarSesion.mockRejectedValue(new HttpException('Error', HttpStatus.BAD_GATEWAY));
+            const errorHttp = new HttpException('Error', HttpStatus.BAD_GATEWAY);
+            mockAuthClient.iniciarSesion.mockRejectedValue(errorHttp);
 
             await expect(authService.iniciarSesion(loginUsuarioDtoMock, headersMock))
-                .rejects.toThrow(HttpException);
+                .rejects.toThrow(errorHttp);
         });
     });
 
@@ -75,7 +89,7 @@ describe('AuthService', () => {
         it('Debería validar la sesión exitosamente', async () => {
             mockAuthClient.validarSesion.mockResolvedValue(CoreResponseOk({ valid: true }));
 
-            const result = await authService.validarSesion(headersMock); //[cite: 1]
+            const result = await authService.validarSesion(headersMock);
             
             expect(result.status).toEqual(200);
             expect(result.data.valid).toBe(true);
@@ -92,6 +106,8 @@ describe('AuthService', () => {
         it('Debería lanzar error en caso de fallo del sistema', async () => {
             mockAuthClient.validarSesion.mockRejectedValue(new Error('Fallo interno'));
 
+            // Asumiendo que validarSesion no tiene el try/catch que formatea a HttpException,
+            // de lo contrario, cambialo por el new HttpException igual que los de arriba.
             await expect(authService.validarSesion(headersMock)).rejects.toThrow('Fallo interno');
         });
     });
@@ -100,7 +116,7 @@ describe('AuthService', () => {
         it('Debería cerrar sesión exitosamente', async () => {
             mockAuthClient.cerrarSesion.mockResolvedValue(CoreResponseOk({ success: true }));
 
-            const result = await authService.cerrarSesion(headersMock); //[cite: 1]
+            const result = await authService.cerrarSesion(headersMock);
             
             expect(result.status).toEqual(200);
         });
@@ -124,7 +140,7 @@ describe('AuthService', () => {
         it('Debería solicitar la recuperación exitosamente', async () => {
             mockAuthClient.solicitarRecuperacion.mockResolvedValue(CoreResponseOk({ sent: true }));
 
-            const result = await authService.solicitarRecuperacion(correoRecuperacionDtoMock, headersMock); //[cite: 1]
+            const result = await authService.solicitarRecuperacion(correoRecuperacionDtoMock, headersMock);
             
             expect(result.status).toEqual(200);
             expect(mockAuthClient.solicitarRecuperacion).toHaveBeenCalledWith(correoRecuperacionDtoMock, headersMock);
@@ -141,7 +157,8 @@ describe('AuthService', () => {
         it('Debería propagar errores inesperados', async () => {
             mockAuthClient.solicitarRecuperacion.mockRejectedValue(new Error('Error SMTP'));
 
-            await expect(authService.solicitarRecuperacion(correoRecuperacionDtoMock, headersMock)).rejects.toThrow('Error SMTP');
+            await expect(authService.solicitarRecuperacion(correoRecuperacionDtoMock, headersMock))
+                .rejects.toThrow(new HttpException('El servidor principal no responde', HttpStatus.INTERNAL_SERVER_ERROR));
         });
     });
 
@@ -149,7 +166,7 @@ describe('AuthService', () => {
         it('Debería restablecer la contraseña exitosamente', async () => {
             mockAuthClient.restablecerContrasena.mockResolvedValue(CoreResponseOk({ success: true }));
 
-            const result = await authService.restablecerContrasena(restablecerContrasenaDtoMock, headersMock); //[cite: 1]
+            const result = await authService.restablecerContrasena(restablecerContrasenaDtoMock, headersMock);
             
             expect(result.status).toEqual(200);
             expect(mockAuthClient.restablecerContrasena).toHaveBeenCalledWith(restablecerContrasenaDtoMock, headersMock);
@@ -166,7 +183,8 @@ describe('AuthService', () => {
         it('Debería propagar excepciones', async () => {
             mockAuthClient.restablecerContrasena.mockRejectedValue(new Error('Fatal error'));
 
-            await expect(authService.restablecerContrasena(restablecerContrasenaDtoMock, headersMock)).rejects.toThrow('Fatal error');
+            await expect(authService.restablecerContrasena(restablecerContrasenaDtoMock, headersMock))
+                .rejects.toThrow(new HttpException('El servidor principal no responde', HttpStatus.INTERNAL_SERVER_ERROR));
         });
     });
 });

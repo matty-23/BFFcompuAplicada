@@ -1,13 +1,18 @@
 import { beforeEach, describe, it, expect, jest, afterEach } from '@jest/globals';
 import { AuthClient } from '../../../src/client/AuthClient';
 import { headersMock } from '../../models/core.response';
-import {  registrarUsuarioDtoMock,  loginUsuarioDtoMock, correoRecuperacionDtoMock,  restablecerContrasenaDtoMock } from '../../models/auth.modelo';
+import { registrarUsuarioDtoMock, loginUsuarioDtoMock,  correoRecuperacionDtoMock, restablecerContrasenaDtoMock } from '../../models/auth.modelo';
 
 describe('AuthClient', () => {
     let authClient: AuthClient;
     const mockBaseUrl = 'http://mock-core.com';
 
-    // Helper limpio y directo
+    // Headers mockeados en minúscula para simular el objeto Express/Node nativo
+    const clientHeadersMock = {
+        origin: headersMock.Origin,
+        cookie: headersMock.Cookie,
+    };
+
     const createFetchResponse = (status: number, data: any, cookies: string[] = []): Response => ({
         status,
         headers: {
@@ -33,7 +38,7 @@ describe('AuthClient', () => {
         it('Debería hacer POST a /api/auth/sign-up/email enviando Origin y Cookie', async () => {
             jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(201, { id: '1' }));
 
-            const result = await authClient.registrarUsuario(registrarUsuarioDtoMock, headersMock);
+            const result = await authClient.registrarUsuario(registrarUsuarioDtoMock, clientHeadersMock);
 
             expect(global.fetch).toHaveBeenCalledWith(
                 `${mockBaseUrl}/api/auth/sign-up/email`,
@@ -41,19 +46,19 @@ describe('AuthClient', () => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Origin': headersMock.Origin,
-                        'Cookie': headersMock.Cookie,
+                        'Origin': clientHeadersMock.origin,
+                        'Cookie': clientHeadersMock.cookie,
                     },
                     body: JSON.stringify(registrarUsuarioDtoMock),
                 }
             );
-            expect(result.status).toEqual(200);
+            expect(result.status).toEqual(201);
             expect(result.data).toEqual({ id: '1' });
         });
 
         it('Debería propagar el error si fetch falla', async () => {
             jest.mocked(global.fetch).mockRejectedValueOnce(new Error('Network error'));
-            await expect(authClient.registrarUsuario(registrarUsuarioDtoMock, headersMock)).rejects.toThrow('Network error');
+            await expect(authClient.registrarUsuario(registrarUsuarioDtoMock, clientHeadersMock)).rejects.toThrow('Network error');
         });
     });
 
@@ -62,17 +67,16 @@ describe('AuthClient', () => {
             const mockCookies = ['sessionId=123; HttpOnly; Path=/'];
             jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { token: 'abc' }, mockCookies));
 
-            const result = await authClient.iniciarSesion(loginUsuarioDtoMock, headersMock);
+            const result = await authClient.iniciarSesion(loginUsuarioDtoMock, clientHeadersMock);
 
-            // IMPORTANTE: Asegurate de arreglar tu código de producción para que use headersMock.Origin 
-            // en lugar de 'http://localhost:3001' hardcodeado.
             expect(global.fetch).toHaveBeenCalledWith(
                 `${mockBaseUrl}/api/auth/sign-in/email`,
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Origin': headersMock.Origin, 
+                        'Origin': clientHeadersMock.origin, 
+                        'Cookie': clientHeadersMock.cookie, 
                     },
                     body: JSON.stringify(loginUsuarioDtoMock),
                 }
@@ -84,7 +88,7 @@ describe('AuthClient', () => {
 
         it('Debería propagar el error de conexión de fetch', async () => {
             jest.mocked(global.fetch).mockRejectedValueOnce(new Error('Core no disponible'));
-            await expect(authClient.iniciarSesion(loginUsuarioDtoMock, headersMock)).rejects.toThrow('Core no disponible');
+            await expect(authClient.iniciarSesion(loginUsuarioDtoMock, clientHeadersMock)).rejects.toThrow('Core no disponible');
         });
     });
 
@@ -92,15 +96,15 @@ describe('AuthClient', () => {
         it('Debería hacer GET a /api/auth/get-session', async () => {
             jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { valid: true }));
 
-            const result = await authClient.validarSesion(headersMock);
+            const result = await authClient.validarSesion(clientHeadersMock);
 
             expect(global.fetch).toHaveBeenCalledWith(
                 `${mockBaseUrl}/api/auth/get-session`,
                 {
                     method: 'GET',
                     headers: {
-                        'Origin': headersMock.Origin,
-                        'Cookie': headersMock.Cookie,
+                        'Origin': clientHeadersMock.origin,
+                        'Cookie': clientHeadersMock.cookie,
                     },
                 }
             );
@@ -112,15 +116,15 @@ describe('AuthClient', () => {
         it('Debería hacer POST a /api/auth/sign-out', async () => {
             jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { success: true }));
 
-            const result = await authClient.cerrarSesion(headersMock);
+            const result = await authClient.cerrarSesion(clientHeadersMock);
 
             expect(global.fetch).toHaveBeenCalledWith(
                 `${mockBaseUrl}/api/auth/sign-out`,
                 {
                     method: 'POST',
                     headers: {
-                        'Origin': headersMock.Origin,
-                        'Cookie': headersMock.Cookie,
+                        'Origin': clientHeadersMock.origin,
+                        'Cookie': clientHeadersMock.cookie,
                     },
                 }
             );
@@ -132,7 +136,7 @@ describe('AuthClient', () => {
         it('Debería hacer POST a /api/auth/forget-password', async () => {
             jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { sent: true }));
 
-            const result = await authClient.solicitarRecuperacion(correoRecuperacionDtoMock, headersMock);
+            const result = await authClient.solicitarRecuperacion(correoRecuperacionDtoMock, clientHeadersMock);
 
             expect(global.fetch).toHaveBeenCalledWith(
                 `${mockBaseUrl}/api/auth/forget-password`,
@@ -140,7 +144,7 @@ describe('AuthClient', () => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Origin': headersMock.Origin,
+                        'Origin': clientHeadersMock.origin,
                     },
                     body: JSON.stringify(correoRecuperacionDtoMock),
                 }
@@ -153,7 +157,7 @@ describe('AuthClient', () => {
         it('Debería hacer POST a /api/auth/reset-password mapeando los campos del DTO', async () => {
             jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { updated: true }));
 
-            const result = await authClient.restablecerContrasena(restablecerContrasenaDtoMock, headersMock);
+            const result = await authClient.restablecerContrasena(restablecerContrasenaDtoMock, clientHeadersMock);
 
             expect(global.fetch).toHaveBeenCalledWith(
                 `${mockBaseUrl}/api/auth/reset-password`,
@@ -161,7 +165,7 @@ describe('AuthClient', () => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Origin': headersMock.Origin,
+                        'Origin': clientHeadersMock.origin,
                     },
                     body: JSON.stringify({
                         newPassword: restablecerContrasenaDtoMock.newPassword,
