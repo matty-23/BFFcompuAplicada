@@ -43,17 +43,12 @@ export class AuthClient implements IAuthClient {
   async iniciarSesion(body: LoginUsuarioDTO, headers: Record<string, any>): Promise<CoreResponse> {
     const url = `${process.env.coreBaseUrl}/api/auth/sign-in/email`;
 
-    const newHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Origin': 'http://localhost:3001',
-    };
-
-
-
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        ...newHeaders
+        'Content-Type': 'application/json',
+        ...(headers.origin && { 'Origin': headers.origin }),
+        ...(headers.cookie && { 'Cookie': headers.cookie }),
       },
       body: JSON.stringify(body),
     });
