@@ -7,7 +7,7 @@ import { CrearSolicitudDTO, ModificarSolicitudDTO, AceptarSolicitudDTO, Rechazar
 
 @Injectable({ scope: Scope.REQUEST })
 export class SolicitudClient implements ISolicitudClient {
-    private readonly baseUrl = `${process.env.BACKEND_URL}/api/solicitudes`;
+    private readonly baseUrl = `${process.env.coreBaseUrl}/api/solicitudes`;
 
     constructor(@Inject(REQUEST) private readonly request: Request) {}
 
