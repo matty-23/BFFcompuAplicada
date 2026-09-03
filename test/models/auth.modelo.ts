@@ -23,3 +23,9 @@ export const restablecerContrasenaDtoMock: RestablecerContrasenaDTO = {
     newPassword: "NewPassword123!",
     token: "token-secreto-123"
 };
+
+export const loginRespuestaBackendMock = {
+    user: {
+        id: "1",
+        email: "juan@example.com",
+        name: "Juan"}};

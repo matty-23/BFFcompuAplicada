@@ -4,19 +4,13 @@ import { FastifyAdapter } from '@nestjs/platform-fastify';
 import request from 'supertest';
 import nock from 'nock';
 import { AppModule } from '../../../src/app.module';
-import { LoginUsuarioDTO } from '../../../src/DTO/AuthUsuarioDTO';
+import { loginUsuarioDtoMock,loginRespuestaBackendMock } from '../../models/auth.modelo';
+
 
 describe('POST /auth/login (Integration)', () => {
     let app: INestApplication;
 
-    const loginDto: LoginUsuarioDTO = {
-        name: 'Matias',
-        email: 'test@test.com',
-        password: '12345678',
-    };
-
     beforeAll(async () => {
-        process.env.coreBaseUrl = 'http://localhost:3000';
 
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [AppModule],
@@ -24,45 +18,26 @@ describe('POST /auth/login (Integration)', () => {
 
         app = moduleFixture.createNestApplication(new FastifyAdapter());
 
-        app.useGlobalPipes(
-            new ValidationPipe({
-                whitelist: true,
-                transform: true,
-            }),
-        );
+        app.useGlobalPipes( new ValidationPipe({whitelist: true,transform: true,  }),);
 
         await app.init();
         await app.getHttpAdapter().getInstance().ready();
     });
 
-    beforeEach(() => {
-        nock.cleanAll();
-    });
+    beforeEach(() => {nock.cleanAll(); });
 
-    afterEach(() => {
-        expect(nock.isDone()).toBe(true);
-        nock.cleanAll();
-    });
+    afterEach(() => {expect(nock.isDone()).toBe(true);nock.cleanAll(); });
 
-    afterAll(async () => {
-        nock.restore();
-        await app.close();
-    });
+    afterAll(async () => {nock.restore();await app.close();});
 
     it('debería iniciar sesión y devolver cookies', async () => {
         const scope = nock('http://localhost:3000')
-            .post('/api/auth/sign-in/email', { ...loginDto })
+            .post('/api/auth/sign-in/email', { ...loginUsuarioDtoMock })
             .matchHeader('content-type', 'application/json')
             .matchHeader('origin', 'http://localhost:5173')
             .reply(
                 200,
-                {
-                    user: {
-                        id: '1',
-                        email: 'test@test.com',
-                        name: 'Matias',
-                    },
-                },
+                loginRespuestaBackendMock,
                 {
                     'Set-Cookie': [
                         'better-auth.session_token=abc123; Path=/; HttpOnly',
@@ -71,20 +46,13 @@ describe('POST /auth/login (Integration)', () => {
                 },
             );
 
-        const response = await request(app.getHttpServer())
-            .post('/auth/login')
-            .set('Origin', 'http://localhost:5173')
-            .send(loginDto);
+        const response = await request(app.getHttpServer()).post('/auth/login').set('Origin', 'http://localhost:5173').send(loginUsuarioDtoMock);
 
         expect(response.status).toBe(200);
 
-        expect(response.body).toEqual({
-            user: {
-                id: '1',
-                email: 'test@test.com',
-                name: 'Matias',
-            },
-        });
+        expect(response.body).toEqual(
+            loginRespuestaBackendMock
+        );
 
         expect(response.headers['set-cookie']).toEqual(
             expect.arrayContaining([
@@ -106,7 +74,7 @@ describe('POST /auth/login (Integration)', () => {
 
         const response = await request(app.getHttpServer())
             .post('/auth/login')
-            .send(loginDto);
+            .send(loginUsuarioDtoMock);
 
         expect(response.status).toBe(401);
 
@@ -143,7 +111,7 @@ describe('POST /auth/login (Integration)', () => {
         await request(app.getHttpServer())
             .post("/auth/login")
             .set("Cookie", "better-auth.session_token=abc123")
-            .send(loginDto)
+            .send(loginUsuarioDtoMock)
             .expect(200);
 
         expect(scope.isDone()).toBe(true);
