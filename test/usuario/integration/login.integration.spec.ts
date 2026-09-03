@@ -7,7 +7,7 @@ import { AppModule } from '../../../src/app.module';
 import { loginUsuarioDtoMock,loginRespuestaBackendMock } from '../../models/auth.modelo';
 
 
-describe('POST /auth/login (Integration)', () => {
+describe('POST /auth/login ', () => {
     let app: INestApplication;
 
     beforeAll(async () => {
@@ -115,5 +115,21 @@ describe('POST /auth/login (Integration)', () => {
             .expect(200);
 
         expect(scope.isDone()).toBe(true);
+    });
+    it("deberia devolver 500 si hubo un error inesperado en backend", async () => {
+        nock("http://localhost:3000")
+            .post("/api/auth/sign-in/email")
+            .reply(500, { code: 'INTERNAL_SERVER_ERROR', message: "Error inesperado" });
+
+        const response = await request(app.getHttpServer())
+            .post('/auth/login')
+            .send(loginUsuarioDtoMock);
+
+        expect(response.status).toBe(500);
+
+        expect(response.body).toEqual({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Error inesperado',
+        });
     });
 });

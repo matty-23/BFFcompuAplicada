@@ -5,7 +5,7 @@ export const registrarUsuarioDtoMock: RegistrarUsuarioDTO = {
     apellido: "Pérez",
     email: "juan@example.com",
     password: "Password123!",
-    departamento: "Sistemas"
+    departamento: "Secretaria"
 };
 
 export const loginUsuarioDtoMock: LoginUsuarioDTO = {
@@ -29,3 +29,15 @@ export const loginRespuestaBackendMock = {
         id: "1",
         email: "juan@example.com",
         name: "Juan"}};
+
+export const registroRespuestaBackendMock = {
+  token: "asssss",
+  user: {
+    id: "1",
+    correo: "juan@example.com",
+    nombre: "Juan",
+    apellido: "Pérez",
+    departamento: "Secretaria",
+    rol: 1,
+  },
+};
