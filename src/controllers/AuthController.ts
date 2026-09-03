@@ -5,16 +5,17 @@ import { LoginUsuarioDTO, RegistrarUsuarioDTO,CorreoRecuperacionContrasenaDTO,Re
 import { AuthGuard } from '../guards/auth.guard';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { type Cache } from 'cache-manager';
+import {type FastifyReply } from 'fastify';
 
 @Controller('/auth')
 export class AuthController {
   constructor(@Inject('IAuthService') private readonly authService: IAuthService,@Inject(CACHE_MANAGER) private cacheManager: Cache) { }
 
   @Post('/registro')
-  async registrarUsuario(@Body() crearUsuarioDto: RegistrarUsuarioDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
+  async registrarUsuario(@Body() crearUsuarioDto: RegistrarUsuarioDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: FastifyReply) {
     const resultado = await this.authService.registrarUsuario(crearUsuarioDto, headers);
 
-    if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
+    if (resultado.cookies && resultado.cookies.length > 0) res.header('Set-Cookie', resultado.cookies);
 
     res.status(resultado.status);
     return resultado.data;
@@ -27,11 +28,11 @@ async validarPerfil(@Headers() headers: Record<string, string>) {
 }
 
   @Post('/login')
-  async iniciarSesion(@Body() bodyLogin: LoginUsuarioDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response,) {
+  async iniciarSesion(@Body() bodyLogin: LoginUsuarioDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: FastifyReply,) {
 
     const resultado = await this.authService.iniciarSesion(bodyLogin, headers,);
 
-    if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
+    if (resultado.cookies && resultado.cookies.length > 0) res.header('Set-Cookie', resultado.cookies);
 
     res.status(resultado.status);
 
@@ -40,7 +41,7 @@ async validarPerfil(@Headers() headers: Record<string, string>) {
 
   @Post("/logout")
   @UseGuards(AuthGuard)
-  async cerrarSesion(@Res({ passthrough: true }) res: Response,@Headers() headers: Record<string, string>,) {
+  async cerrarSesion(@Res({ passthrough: true }) res: FastifyReply,@Headers() headers: Record<string, string>,) {
     const resultado = await this.authService.cerrarSesion(headers);
 
     const cookieStr = headers.cookie || '';
@@ -51,26 +52,26 @@ async validarPerfil(@Headers() headers: Record<string, string>) {
         await this.cacheManager.del(token);
     }
 
-    if (resultado.cookies?.length) res.setHeader('Set-Cookie', resultado.cookies);
+    if (resultado.cookies?.length) res.header('Set-Cookie', resultado.cookies);
     res.status(resultado.status);
     return resultado.data;
   }
 
   @Post('/recuperacion')
-  async solicitarRecuperacion(@Body() body: CorreoRecuperacionContrasenaDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
+  async solicitarRecuperacion(@Body() body: CorreoRecuperacionContrasenaDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: FastifyReply) {
     const resultado = await this.authService.solicitarRecuperacion(body, headers);
     
-    if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
+    if (resultado.cookies && resultado.cookies.length > 0) res.header('Set-Cookie', resultado.cookies);
     res.status(resultado.status);
     
     return resultado.data;
   }
 
   @Post('/restablecer')
-  async restablecerContrasena(@Body() body: RestablecerContrasenaDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: Response) {
+  async restablecerContrasena(@Body() body: RestablecerContrasenaDTO, @Headers() headers: Record<string, string>, @Res({ passthrough: true }) res: FastifyReply) {
     const resultado = await this.authService.restablecerContrasena(body, headers);
     
-    if (resultado.cookies && resultado.cookies.length > 0) res.setHeader('Set-Cookie', resultado.cookies);
+    if (resultado.cookies && resultado.cookies.length > 0) res.header('Set-Cookie', resultado.cookies);
     res.status(resultado.status);
     
     return resultado.data;

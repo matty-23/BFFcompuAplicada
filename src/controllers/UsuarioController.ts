@@ -4,7 +4,7 @@ import type { IUsuarioService } from '../interfaces/IUsuarioService';
 import { UsuarioDTO } from '../DTO/UsuarioDTO';
 import { CambiarContraseñaDTO } from '../DTO/AuthUsuarioDTO';
 import { GetUsuariosQueryDTO } from '../DTO/UsuarioDTO';
-import { RequierePermiso } from '../decorators/permisos.decorator.js';
+import { RequierePermiso } from '../decorators/permisos.decorator';
 import { PermissionsGuard } from '../guards/permissions.guard';
 import { Permiso } from '../models/roles/Permisos';
 import { AuthGuard } from "../guards/auth.guard";

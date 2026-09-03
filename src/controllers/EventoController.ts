@@ -2,7 +2,7 @@ import { Controller, Query, Get, Post, Put, Delete, Patch, Param, Body, Inject, 
 import type { IEventoService } from '../interfaces/IEventoService';
 import { CrearEventoMultiDTO, ActualizarEventoDTO, AsignarEncargadoDTO, ActualizarOcurrenciaDTO } from '../DTO/EventoDTO';
 import { filtrosEventoDto } from '../DTO/FiltrosDto';
-import { RequierePermiso } from '../decorators/permisos.decorator.js';
+import { RequierePermiso } from '../decorators/permisos.decorator';
 import { PermissionsGuard } from '../guards/permissions.guard';
 import { Permiso } from '../models/roles/Permisos';
 import { AuthGuard } from "../guards/auth.guard";

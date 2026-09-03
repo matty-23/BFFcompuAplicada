@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UsuariosModule } from './modules/usuario.module';
+import { UsuariosModule } from './modules/UsuarioModule';
 import { ConfigModule } from '@nestjs/config';
 import { EventoModule } from './modules/EventoModule';
 import { AuthModule } from './modules/AuthModule';

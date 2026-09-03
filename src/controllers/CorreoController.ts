@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Headers, Inject, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import type { ICorreoService } from '../interfaces/ICorreoService';
 import {CorreoDTO,CorreoConfirmacionCuentaDTO, } from '../DTO/CorreoDTO';
-import { RequierePermiso } from '../decorators/permisos.decorator.js';
+import { RequierePermiso } from '../decorators/permisos.decorator';
 import { PermissionsGuard } from "../guards/permissions.guard";
 import { Permiso } from "../models/roles/Permisos";
 import { AuthGuard } from "../guards/auth.guard";
