@@ -1,4 +1,5 @@
 import { beforeEach, describe, it, expect, jest, afterEach } from '@jest/globals';
+import { HttpException } from '@nestjs/common';
 import { SolicitudClient } from '../../../src/client/SolicitudClient';
 import {  solicitudViewModelMock, crearSolicitudDtoMock, modificarSolicitudDtoMock, aceptarSolicitudDtoMock, rechazarSolicitudDtoMock, filtrosSolicitudDtoMock} from '../../models/solicitud.modelo';
 import { Request } from 'express'; 
@@ -10,6 +11,7 @@ describe('SolicitudClient', () => {
     const createFetchResponse = (status: number, data: any): Response => ({
         status,
         json: jest.fn<() => Promise<any>>().mockResolvedValue(data),
+        text: jest.fn<() => Promise<string>>().mockResolvedValue(typeof data === 'string' ? data : JSON.stringify(data)),
         ok: status >= 200 && status < 300
     } as unknown as Response);
 
@@ -44,6 +46,12 @@ describe('SolicitudClient', () => {
             );
             expect(result).toEqual(solicitudViewModelMock);
         });
+
+        it('Debería lanzar HttpException si el backend rechaza la creación', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(400, 'Datos inválidos'));
+
+            await expect(solicitudClient.crear(crearSolicitudDtoMock)).rejects.toThrow(HttpException);
+        });
     });
 
     describe('obtenerPorId', () => {
@@ -59,6 +67,20 @@ describe('SolicitudClient', () => {
                 })
             );
             expect(result).toEqual(solicitudViewModelMock);
+        });
+
+        it('Debería retornar null si la solicitud no existe (404)', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce({ status: 404, ok: false } as unknown as Response);
+
+            const result = await solicitudClient.obtenerPorId('sol-999');
+
+            expect(result).toBeNull();
+        });
+
+        it('Debería lanzar HttpException ante otros errores del backend', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(500, 'Error interno'));
+
+            await expect(solicitudClient.obtenerPorId('sol-1')).rejects.toThrow(HttpException);
         });
     });
 
@@ -76,6 +98,12 @@ describe('SolicitudClient', () => {
             );
             expect(result).toEqual([solicitudViewModelMock]);
         });
+
+        it('Debería lanzar HttpException si el backend rechaza el listado', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(500, 'Error interno'));
+
+            await expect(solicitudClient.listar(filtrosSolicitudDtoMock, 2)).rejects.toThrow(HttpException);
+        });
     });
 
     describe('listarPorUsuario', () => {
@@ -91,6 +119,12 @@ describe('SolicitudClient', () => {
                 })
             );
             expect(result).toEqual([solicitudViewModelMock]);
+        });
+
+        it('Debería lanzar HttpException si el backend rechaza el listado', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(500, 'Error interno'));
+
+            await expect(solicitudClient.listarPorUsuario(1)).rejects.toThrow(HttpException);
         });
     });
 
@@ -110,6 +144,12 @@ describe('SolicitudClient', () => {
             );
             expect(result).toEqual({ ok: true });
         });
+
+        it('Debería lanzar HttpException si el backend rechaza la modificación', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(400, 'Datos inválidos'));
+
+            await expect(solicitudClient.modificar('sol-1', modificarSolicitudDtoMock)).rejects.toThrow(HttpException);
+        });
     });
 
     describe('cancelar', () => {
@@ -126,6 +166,12 @@ describe('SolicitudClient', () => {
                 })
             );
             expect(result).toEqual({ ok: true });
+        });
+
+        it('Debería lanzar HttpException si el backend rechaza la cancelación', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(404, 'No encontrada'));
+
+            await expect(solicitudClient.cancelar('sol-1')).rejects.toThrow(HttpException);
         });
     });
 
@@ -145,6 +191,12 @@ describe('SolicitudClient', () => {
             );
             expect(result).toEqual({ ok: true });
         });
+
+        it('Debería lanzar HttpException si el backend rechaza la aceptación', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(400, 'No se puede aceptar'));
+
+            await expect(solicitudClient.aceptar('sol-1', aceptarSolicitudDtoMock)).rejects.toThrow(HttpException);
+        });
     });
 
     describe('rechazar', () => {
@@ -162,6 +214,26 @@ describe('SolicitudClient', () => {
                 })
             );
             expect(result).toEqual({ ok: true });
+        });
+
+        it('Debería enviar un body vacío si no se especifica dto', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { ok: true }));
+
+            await solicitudClient.rechazar('sol-1');
+
+            expect(global.fetch).toHaveBeenCalledWith(
+                expect.stringContaining('/api/solicitudes/sol-1/rechazar'),
+                expect.objectContaining({
+                    method: 'PATCH',
+                    body: JSON.stringify({}),
+                })
+            );
+        });
+
+        it('Debería lanzar HttpException si el backend rechaza el rechazo de la solicitud', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(400, 'No se puede rechazar'));
+
+            await expect(solicitudClient.rechazar('sol-1', rechazarSolicitudDtoMock)).rejects.toThrow(HttpException);
         });
     });
 });

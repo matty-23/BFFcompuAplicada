@@ -58,6 +58,20 @@ describe('CorreoClient', () => {
     await expect(correoClient.enviarNotificacion(correoDtoMock, clientHeadersMock))
         .rejects.toThrow('Error 400: Bad Request'); // <-- Sin comillas
 });
+
+        it('Debería devolver true si la respuesta es exitosa pero sin body', async () => {
+            const emptyResponse = {
+                status: 200,
+                ok: true,
+                json: jest.fn<() => Promise<any>>(),
+                text: jest.fn<() => Promise<string>>().mockResolvedValue(''),
+            } as unknown as Response;
+            jest.mocked(global.fetch).mockResolvedValueOnce(emptyResponse);
+
+            const result = await correoClient.enviarNotificacion(correoDtoMock, clientHeadersMock);
+
+            expect(result).toBe(true);
+        });
     });
 
     describe('enviarCorreoCuenta', () => {
@@ -80,5 +94,41 @@ describe('CorreoClient', () => {
     );
     expect(result).toEqual({ sent: true });
 });
+
+        it('Debería lanzar un error si el status no es exitoso', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(500, 'Server Error'));
+
+            await expect(correoClient.enviarCorreoCuenta(correoConfirmacionCuentaDtoMock, clientHeadersMock))
+                .rejects.toThrow('Error 500: Server Error');
+        });
+    });
+
+    describe('enviarCorreoConfirmacionSolicitud', () => {
+        it('Debería hacer POST a /notificaciones/confirmacion y devolver true', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(200, { sent: true }));
+
+            const result = await correoClient.enviarCorreoConfirmacionSolicitud(correoDtoMock, clientHeadersMock);
+
+            expect(global.fetch).toHaveBeenCalledWith(
+                `${mockBaseUrl}/notificaciones/confirmacion`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': clientHeadersMock.origin,
+                        'Cookie': clientHeadersMock.cookie,
+                    },
+                    body: JSON.stringify(correoDtoMock),
+                }
+            );
+            expect(result).toEqual({ sent: true });
+        });
+
+        it('Debería lanzar un error si el status no es exitoso', async () => {
+            jest.mocked(global.fetch).mockResolvedValueOnce(createFetchResponse(400, 'Bad Request'));
+
+            await expect(correoClient.enviarCorreoConfirmacionSolicitud(correoDtoMock, clientHeadersMock))
+                .rejects.toThrow('Error 400: Bad Request');
+        });
     });
 });

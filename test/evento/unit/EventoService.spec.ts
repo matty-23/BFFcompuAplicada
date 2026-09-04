@@ -78,5 +78,73 @@ describe('EventoService', () => {
             expect(result).toEqual([eventoViewModelMock]);
             expect(mockEventoClient.getConFiltros).toHaveBeenCalledWith(filtrosEventoDtoMock);
         });
+
+        it('Debería asignar página 1 por defecto si no se especifica', async () => {
+            mockEventoClient.getConFiltros.mockResolvedValue([eventoViewModelMock]);
+            const filtrosSinPage = { categoria: 'Académico' };
+
+            await eventoService.filtrado(filtrosSinPage as typeof filtrosEventoDtoMock);
+
+            expect(mockEventoClient.getConFiltros).toHaveBeenCalledWith(
+                expect.objectContaining({ page: 1 })
+            );
+        });
+    });
+
+    describe('getEventoById', () => {
+        it('Debería obtener un evento por id exitosamente', async () => {
+            mockEventoClient.getById.mockResolvedValue(eventoViewModelMock);
+
+            const result = await eventoService.getEventoById('1');
+
+            expect(result).toEqual(eventoViewModelMock);
+            expect(mockEventoClient.getById).toHaveBeenCalledWith('1');
+        });
+
+        it('Debería retornar null si el evento no existe', async () => {
+            mockEventoClient.getById.mockResolvedValue(null);
+
+            const result = await eventoService.getEventoById('inexistente');
+
+            expect(result).toBeNull();
+        });
+
+        it('Debería propagar el error si el cliente falla', async () => {
+            mockEventoClient.getById.mockRejectedValue(new Error('Error de red'));
+
+            await expect(eventoService.getEventoById('1')).rejects.toThrow('Error de red');
+        });
+    });
+
+    describe('agregarParticipantes', () => {
+        it('Debería agregar participantes a una ocurrencia (void)', async () => {
+            mockEventoClient.agregarParticipantes.mockResolvedValue(undefined);
+
+            await expect(eventoService.agregarParticipantes('oc-1', ['u1', 'u2'])).resolves.not.toThrow();
+            expect(mockEventoClient.agregarParticipantes).toHaveBeenCalledWith('oc-1', ['u1', 'u2']);
+        });
+
+        it('Debería propagar el error si el cliente falla', async () => {
+            mockEventoClient.agregarParticipantes.mockRejectedValue(new Error('Participante inválido'));
+
+            await expect(eventoService.agregarParticipantes('oc-1', ['u1'])).rejects.toThrow('Participante inválido');
+        });
+    });
+
+    describe('borrarParticipante', () => {
+        it('Debería borrar un participante y devolver el EventoViewModel', async () => {
+            mockEventoClient.borrarParticipante.mockResolvedValue(eventoViewModelMock);
+
+            const result = await eventoService.borrarParticipante('oc-1', 'u1');
+
+            expect(result).toEqual(eventoViewModelMock);
+            expect(mockEventoClient.borrarParticipante).toHaveBeenCalledWith('oc-1', 'u1');
+        });
+
+        it('Debería propagar el error si el cliente falla', async () => {
+            mockEventoClient.borrarParticipante.mockRejectedValue(new Error('No encontrado'));
+
+            await expect(eventoService.borrarParticipante('oc-1', 'u-x')).rejects.toThrow('No encontrado');
+        });
     });
 });
