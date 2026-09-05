@@ -12,9 +12,13 @@ export class OcurrenciaViewModel {
         private readonly participantes: UsuarioViewModel[] = [],
         private readonly encargado?: UsuarioViewModel,
         private readonly idApiGoogle: boolean = false,
-        private ocurrencia_original?: Date,
+        private readonly ocurrencia_original?: Date,
         private readonly fueActualizado: boolean = false,
+        private readonly id_api_google_instancia?: string // <--- NUEVO
     ) {}
+   getIdApiGoogleInstancia(): string | undefined {
+        return this.id_api_google_instancia;
+    }
 
     getId(): string {
         return this.id;
@@ -73,6 +77,9 @@ export class OcurrenciaViewModel {
             participantes: this.participantes.map(p => p.toJSON()),
             idApiGoogle: this.idApiGoogle,
             fueActualizado: this.fueActualizado,
+            ocurrencia_original: this.ocurrencia_original, // <--- ¡ESTO ES LO QUE FALTA!
+            id_api_google_instancia: this.id_api_google_instancia
         };
+    
     }
 }

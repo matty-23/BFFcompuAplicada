@@ -18,7 +18,9 @@ export class EventoClient implements IEventoClient {
 
     // En EventoClient.ts (Frontend/BFF)
     private mapearEvento(raw: any): EventoViewModel {
-
+console.log('=== DATA CRUDA RECIBIDA DEL CORE ===');
+        console.dir(raw, { depth: null, colors: true });
+        // 👆 ========================================= 👆
         const ocurrencias = (raw.ocurrencias || []).map((oc: any) => {
 
             const encargado = oc.encargado
@@ -47,14 +49,18 @@ export class EventoClient implements IEventoClient {
 
             return new OcurrenciaViewModel(
                 oc.id,
-                oc.idEvento,
+                oc.idEvento ?? raw.id,
                 new Date(oc.fechaInicio),
                 new Date(oc.fechaFinalizacion),
                 oc.tipo ?? 'normal',
                 oc.lugar,
                 oc.cantidadPersonas ?? 0,
                 participantes,
-                encargado
+                encargado,
+                oc.idApiGoogle ?? false, 
+                (oc.ocurrenciaOriginal || oc.ocurrencia_original)? new Date(oc.ocurrenciaOriginal || oc.ocurrencia_original) : undefined,
+                oc.fueActualizado ?? false,
+                oc.id_api_google_instancia ?? undefined 
             );
         });
 

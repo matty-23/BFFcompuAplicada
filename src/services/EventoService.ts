@@ -36,7 +36,7 @@ export class EventoService implements IEventoService {
         if (dto.estado !== undefined) payload['estado'] = dto.estado;
         if (dto.ocurrencias !== undefined) payload['ocurrencias'] = dto.ocurrencias;
         if (dto.color !== undefined) payload['color'] = dto.color;
-
+        if (dto.recurrencia !== undefined) payload['recurrencia'] = dto.recurrencia;
         await this.eventoClient.actualizar(id, payload);
     }
 

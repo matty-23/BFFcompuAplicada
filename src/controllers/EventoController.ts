@@ -18,6 +18,7 @@ export class EventoController {
     @RequierePermiso(Permiso.LISTAR_EVENTOS)
     async getAll() {
         const eventos = await this.eventoService.getEventos();
+        console.dir(eventos.map(e => e.toJSON()), { depth: null }); // Log de depuración
         return eventos.map(e => e.toJSON());
     }
 
@@ -87,6 +88,11 @@ export class EventoController {
         if (!evento) {
             throw new NotFoundException(`Evento u ocurrencia no encontrados.`);
         }
+        const respuesta = evento.toJSON();
+
+        console.log('\n=== SALIDA DESDE EL CORE (EVENTO CONTROLLER) ===');
+        console.dir(respuesta, { depth: null, colors: true });
+        console.log('=================================================\n');
         return evento.toJSON();
     }
 
