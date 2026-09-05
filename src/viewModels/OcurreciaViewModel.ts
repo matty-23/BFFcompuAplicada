@@ -12,6 +12,7 @@ export class OcurrenciaViewModel {
         private readonly participantes: UsuarioViewModel[] = [],
         private readonly encargado?: UsuarioViewModel,
         private readonly idApiGoogle: boolean = false,
+        private ocurrencia_original?: Date,
         private readonly fueActualizado: boolean = false,
     ) {}
 

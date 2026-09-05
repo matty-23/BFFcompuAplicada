@@ -31,13 +31,11 @@ export class EventoService implements IEventoService {
     }
     async actualizarEvento(id: string, dto: ActualizarEventoDTO): Promise<void> {
         const payload: Record<string, unknown> = {};
-
         if (dto.titulo !== undefined) payload['titulo'] = dto.titulo;
         if (dto.categoria !== undefined) payload['categoria'] = dto.categoria;
         if (dto.estado !== undefined) payload['estado'] = dto.estado;
-
-        // 👈 AÑADE ESTA LÍNEA PARA ENVIAR LAS OCURRENCIAS AL CORE
         if (dto.ocurrencias !== undefined) payload['ocurrencias'] = dto.ocurrencias;
+        if (dto.color !== undefined) payload['color'] = dto.color;
 
         await this.eventoClient.actualizar(id, payload);
     }
@@ -46,13 +44,13 @@ export class EventoService implements IEventoService {
         await this.eventoClient.eliminar(id);
     }
 
-async actualizarOcurrencia(idEvento: string,idOcurrencia: string, dto: ActualizarOcurrenciaDTO): Promise<EventoViewModel> {
-    return await this.eventoClient.actualizarOcurrencia(
-        idEvento,
-        idOcurrencia,
-        dto
-    );
-}
+    async actualizarOcurrencia(idEvento: string, idOcurrencia: string, dto: ActualizarOcurrenciaDTO): Promise<EventoViewModel> {
+        return await this.eventoClient.actualizarOcurrencia(
+            idEvento,
+            idOcurrencia,
+            dto
+        );
+    }
 
     async agregarParticipantes(idOcurrencia: string, participantes: string[]): Promise<void> {
         await this.eventoClient.agregarParticipantes(idOcurrencia, participantes);

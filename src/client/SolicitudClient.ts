@@ -4,7 +4,7 @@ import type { Request } from 'express';
 import { ISolicitudClient } from '../interfaces/ISolicitudClient';
 import { SolicitudViewModel, BloqueSolicitudViewModel } from '../viewModels/SolicitudViewModel';
 import { CrearSolicitudDTO, ModificarSolicitudDTO, AceptarSolicitudDTO, RechazarSolicitudDTO, FiltrosSolicitudDTO } from '../DTO/SolicitudDTO';
-
+const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3000';
 @Injectable({ scope: Scope.REQUEST })
 export class SolicitudClient implements ISolicitudClient {
     private readonly baseUrl = `${BACKEND_URL}/api/solicitudes`;

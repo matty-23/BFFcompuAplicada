@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsNotEmpty, IsArray, ValidateNested, IsInt, IsOptional, ArrayMinSize, IsDateString, Min } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsArray, ValidateNested, IsBoolean, IsOptional, ArrayMinSize, IsDateString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class OcurrenciaDto {
@@ -13,13 +13,14 @@ export class OcurrenciaDto {
     @IsNumber() @Min(1)
     readonly cantidadPersonas!: number;
     @IsString() @IsOptional()
-    readonly id_encargado?: string;
+    readonly id_encargado?: string | null;
     @IsArray() @IsString({ each: true }) @IsOptional()
     readonly participantes?: string[];
+    @IsDateString() @IsOptional()
+    readonly ocurrencia_original?: string;
     @IsString() @IsOptional()
-    readonly idApiGoogle?: boolean;
+    readonly idApiGoogle?: string;
 }
-
 export class ActualizarOcurrenciaDTO {
     @IsString() @IsNotEmpty()
     readonly id!: string;
@@ -34,12 +35,14 @@ export class ActualizarOcurrenciaDTO {
     @IsNumber() @IsOptional()
     readonly cantidadPersonas?: number;
     @IsString() @IsOptional()
-    readonly id_encargado?: string;
+    readonly id_encargado?: string | null;
     @IsArray() @IsString({ each: true }) @IsOptional()
     readonly participantes?: string[];
+    @IsDateString() @IsOptional()
+    readonly ocurrencia_original?: string;
     @IsString() @IsOptional()
-    readonly idApiGoogle?: boolean;
-    @IsString() @IsOptional()
+    readonly idApiGoogle?: string;
+    @IsBoolean() @IsOptional()
     readonly fueActualizado?: boolean;
 }
 
